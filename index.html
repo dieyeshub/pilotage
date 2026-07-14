@@ -79,7 +79,7 @@
   .hist li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
   .hist li:last-child{border-bottom:none}
   .tag{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:8px;color:#fff;flex-shrink:0}
-  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr{background:var(--amber);color:var(--ink-bg)} .tag.prod{background:var(--orange)}
+  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr,.tag.cash{background:var(--amber);color:var(--ink-bg)} .tag.prod{background:var(--orange)}
   .hist .hmain{flex:1}
   .hist .hmain b{font-weight:700;display:block}
   .hist .hmain small{color:var(--muted);font-size:11px}
@@ -106,6 +106,13 @@
 </head>
 <body>
 
+<div id="lock" style="position:fixed;inset:0;background:linear-gradient(160deg,#0F2E2E,#1E4747);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
+  <div style="color:#fff;font-size:19px;font-weight:800;margin-bottom:4px">Di-Eyes <span style="color:#F8B346;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">Pilotage</span></div>
+  <div id="lockLbl" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:16px">Code d'accès</div>
+  <input id="lockPin" type="password" inputmode="numeric" style="width:180px;padding:13px;border:none;border-radius:12px;font-family:inherit;font-size:20px;font-weight:800;text-align:center;letter-spacing:.3em" onkeydown="if(event.key==='Enter')submitPin()">
+  <button onclick="submitPin()" style="margin-top:12px;width:180px;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:14px;font-weight:800;background:#F8B346;color:#0F2E2E;cursor:pointer">Entrer</button>
+</div>
+
 <div class="top">
   <div class="wrap" style="max-width:430px;margin:0 auto;padding:0 16px">
     <div class="brand"><h1>Di-Eyes</h1><span>Pilotage CAP</span></div>
@@ -131,8 +138,8 @@
       <h2 class="sec">Lancer une session</h2>
       <div class="types">
         <button class="tbtn t-pros" onclick="startSession('pros')"><b>Prospection</b><small>DM · commentaires · likes</small></button>
-        <button class="tbtn t-form" onclick="startSession('form')"><b>Formation</b><small>séance client</small></button>
-        <button class="tbtn t-entr" onclick="startSession('entr')"><b>Entretien</b><small>appel · RDV prospect</small></button>
+        <button class="tbtn t-form" onclick="startSession('form')"><b>Session</b><small>prestation délivrée</small></button>
+        <button class="tbtn t-entr" onclick="startSession('cash')"><b>Cash</b><small>encaissé · facturé · entretiens</small></button>
         <button class="tbtn t-prod" onclick="startSession('prod')"><b>Production</b><small>posts · idées</small></button>
       </div>
       <button class="btn ghost" onclick="openManual()">＋ Saisir une session manuellement</button>
@@ -147,7 +154,7 @@
         <select class="f" id="mType" onchange="manualType(this.value)">
           <option value="pros">Prospection</option>
           <option value="form">Formation</option>
-          <option value="entr">Entretien</option>
+          <option value="cash">Cash</option>
           <option value="prod">Production</option>
         </select>
         <div class="grid2">
@@ -163,9 +170,16 @@
         <div class="step"><label>Messages privés (DM)</label><div class="stx"><button onclick="st('dm',-1)">−</button><span class="n" id="s_dm">0</span><button onclick="st('dm',1)">+</button></div></div>
         <div class="step"><label>Réponses reçues</label><div class="stx"><button onclick="st('rep',-1)">−</button><span class="n" id="s_rep">0</span><button onclick="st('rep',1)">+</button></div></div>
         <div class="step"><label>Rendez-vous obtenus</label><div class="stx"><button onclick="st('rdv',-1)">−</button><span class="n" id="s_rdv">0</span><button onclick="st('rdv',1)">+</button></div></div>
+        <div class="step"><label>Posts publiés</label><div class="stx"><button onclick="st('ppub',-1)">−</button><span class="n" id="s_ppub">0</span><button onclick="st('ppub',1)">+</button></div></div>
       </div>
 
       <div id="cf-form" class="hidden">
+        <label class="f" style="margin-top:0">Type de prestation</label>
+        <select class="f" id="fPresta">
+          <option value="formation">Formation</option>
+          <option value="instagram">Instagram</option>
+          <option value="pilotage">Pilotage</option>
+        </select>
         <label class="f">Cliente / client</label>
         <select class="f" id="fClient"></select>
         <div class="grid2">
@@ -175,6 +189,16 @@
         <label class="f" style="display:flex;align-items:center;gap:8px;margin-top:14px">
           <input type="checkbox" id="fDecompte" checked style="width:18px;height:18px"> Décompter du forfait
         </label>
+      </div>
+
+      <div id="cf-cash" class="hidden">
+        <label class="f" style="margin-top:0">Détail (qui, quoi)</label>
+        <input class="f" type="text" id="cQui" placeholder="Ex : Claire — solde forfait">
+        <div class="grid2">
+          <div><label class="f">Encaissé (CHF)</label><input class="f" type="number" id="cCash" placeholder="0"></div>
+          <div><label class="f">Facturé (CHF)</label><input class="f" type="number" id="cFact" placeholder="0"></div>
+        </div>
+        <div class="step" style="margin-top:10px"><label>Entretiens menés</label><div class="stx"><button onclick="st('entrN',-1)">−</button><span class="n" id="s_entrN">0</span><button onclick="st('entrN',1)">+</button></div></div>
       </div>
 
       <div id="cf-entr" class="hidden">
@@ -196,8 +220,9 @@
 
       <div id="cf-prod" class="hidden">
         <div class="step"><label>Posts produits (stock)</label><div class="stx"><button onclick="st('pprod',-1)">−</button><span class="n" id="s_pprod">0</span><button onclick="st('pprod',1)">+</button></div></div>
-        <div class="step"><label>Posts publiés</label><div class="stx"><button onclick="st('ppub',-1)">−</button><span class="n" id="s_ppub">0</span><button onclick="st('ppub',1)">+</button></div></div>
         <div class="step"><label>Idées notées</label><div class="stx"><button onclick="st('idees',-1)">−</button><span class="n" id="s_idees">0</span><button onclick="st('idees',1)">+</button></div></div>
+        <label class="f">Heures outils / stratégie / process (surveillance)</label>
+        <input class="f" type="number" step="0.25" id="pOutils" placeholder="0">
       </div>
 
       <div style="margin-top:16px">
@@ -224,7 +249,7 @@
       <h2 class="sec" style="color:var(--amber)">Sprint · cumul</h2>
       <div class="kpis" id="sprintKpis"></div>
       <div class="goalbar" style="margin-top:12px">
-        <div class="gl" style="color:rgba(255,255,255,.7)"><span>Objectif +700 CHF (encaissé + engagé)</span><b id="gPct" style="color:var(--amber)">0%</b></div>
+        <div class="gl" style="color:rgba(255,255,255,.7)"><span>Objectif +700 CHF (encaissé + facturé)</span><b id="gPct" style="color:var(--amber)">0%</b></div>
         <div class="bar" style="background:rgba(255,255,255,.15)"><i id="gFill" style="width:0%"></i></div>
       </div>
     </div>
@@ -273,7 +298,7 @@
 
 <script>
 const KEY='dieyes-pilot-v1';
-const TYPES={pros:'Prospection',form:'Formation',entr:'Entretien',prod:'Production'};
+const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production'};
 const SPRINT_START='2026-07-08',SPRINT_END='2026-07-25',CASH_GOAL=700;
 let S={sessions:[],clients:[],active:null,coutH:30};
 let counters={},clockTimer=null;
@@ -291,7 +316,20 @@ async function load(){
   if(raw){try{S=Object.assign(S,JSON.parse(raw));}catch(e){}}
   
   document.getElementById('coutH').value=S.coutH;
+  initLock();
   renderAll();if(S.active)startClock();
+}
+function initLock(){
+  if(!S.pin)document.getElementById('lockLbl').textContent='Première ouverture — créez votre code (4 chiffres minimum)';
+  document.getElementById('lockPin').focus();
+}
+async function submitPin(){
+  const v=document.getElementById('lockPin').value.trim();
+  if(!S.pin){
+    if(v.length<4){toast('4 chiffres minimum');return;}
+    S.pin=v;await save('Code créé ✓');
+  }else if(v!==S.pin){toast('Code incorrect');document.getElementById('lockPin').value='';return;}
+  document.getElementById('lock').style.display='none';
 }
 async function save(msg){
   const ok=await writeStore(JSON.stringify(S));
@@ -328,7 +366,7 @@ function startClock(){
     document.getElementById('liveClock').textContent=(h>0?h+':':'')+String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
   },1000);
 }
-let manualMode=false;
+let manualMode=false,editIdx=null;
 function openManual(){
   manualMode=true;
   S.active={type:'pros',client:null,start:Date.now()};
@@ -341,7 +379,7 @@ function openManual(){
 }
 function manualType(t){
   S.active.type=t;
-  ['pros','form','entr','prod'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
+  ['pros','form','cash','entr','prod'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
   document.getElementById('cf-'+t).classList.remove('hidden');
   if(t==='form'){
     const sel=document.getElementById('fClient');
@@ -351,12 +389,12 @@ function manualType(t){
 }
 function openClose(){
   counters={};
-  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
+  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
   document.getElementById('startCard').classList.add('hidden');
   document.getElementById('liveCard').classList.add('hidden');
   const cc=document.getElementById('closeCard');cc.classList.remove('hidden');
   if(!manualMode)document.getElementById('manualHead').classList.add('hidden');
-  ['pros','form','entr','prod'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
+  ['pros','form','cash','entr','prod'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
   document.getElementById('cf-'+S.active.type).classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Clore — '+TYPES[S.active.type];
   if(S.active.type==='form'){
@@ -368,7 +406,7 @@ function openClose(){
   }
 }
 function cancelClose(){
-  if(manualMode){S.active=null;manualMode=false;}
+  if(manualMode){S.active=null;manualMode=false;editIdx=null;}
   document.getElementById('closeCard').classList.add('hidden');renderAll();
 }
 function st(k,n){counters[k]=Math.max(0,(counters[k]||0)+n);document.getElementById('s_'+k).textContent=counters[k];}
@@ -384,9 +422,10 @@ function saveClose(){
   }
   const sess={type:a.type,date:when,duree:dureeH,cash:0,eng:0};
   if(a.type==='pros'){Object.assign(sess,counters);}
-  if(a.type==='prod'){Object.assign(sess,{pprod:counters.pprod,ppub:counters.ppub,idees:counters.idees});}
+  if(a.type==='prod'){Object.assign(sess,{pprod:counters.pprod,idees:counters.idees,outilsH:parseFloat(document.getElementById('pOutils').value)||0});}
   if(a.type==='form'){
     sess.client=document.getElementById('fClient').value;
+    sess.presta=document.getElementById('fPresta').value;
     sess.duree=parseFloat(document.getElementById('fDuree').value)||dureeH;
     sess.cash=parseFloat(document.getElementById('fCash').value)||0;
     if(document.getElementById('fDecompte').checked){
@@ -400,8 +439,14 @@ function saveClose(){
     sess.cash=parseFloat(document.getElementById('eCash').value)||0;
     sess.eng=parseFloat(document.getElementById('eEng').value)||0;
   }
+  if(a.type==='cash'){
+    sess.qui=document.getElementById('cQui').value;
+    sess.cash=parseFloat(document.getElementById('cCash').value)||0;
+    sess.eng=parseFloat(document.getElementById('cFact').value)||0;
+    sess.entretiens=counters.entrN||0;
+  }
   if(manualMode&&a.type==='form'&&!document.getElementById('fDuree').value)sess.duree=dureeH;
-  S.sessions.unshift(sess);
+  if(editIdx!==null){S.sessions[editIdx]=sess;editIdx=null;}else{S.sessions.unshift(sess);}
   S.sessions.sort((x,y)=>y.date.localeCompare(x.date));
   S.active=null;manualMode=false;clearInterval(clockTimer);
   document.getElementById('closeCard').classList.add('hidden');
@@ -423,11 +468,12 @@ function setCout(v){S.coutH=parseFloat(v)||30;save();renderAll();}
 /* ── Rendu ── */
 function inSprint(d){const k=d.slice(0,10);return k>=SPRINT_START&&k<=SPRINT_END;}
 function agg(list){
-  const t={cash:0,eng:0,dm:0,comptes:0,rep:0,rdv:0,pprod:0,h:0,hA:0};
+  const t={cash:0,eng:0,dm:0,comptes:0,rep:0,rdv:0,pprod:0,h:0,hA:0,hF:0,hInsta:0,hPilot:0,entretiens:0,outilsH:0};
   list.forEach(s=>{
     t.cash+=s.cash||0;t.eng+=s.eng||0;t.dm+=s.dm||0;t.comptes+=s.comptes||0;
-    t.rep+=s.rep||0;t.rdv+=s.rdv||0;t.pprod+=s.pprod||0;t.h+=s.duree||0;
+    t.rep+=s.rep||0;t.rdv+=s.rdv||0;t.pprod+=s.pprod||0;t.h+=s.duree||0;t.entretiens+=s.entretiens||0;t.outilsH+=s.outilsH||0;
     if(s.type==='pros')t.hA+=s.duree||0;
+    if(s.type==='form'){const p=s.presta||'formation';if(p==='instagram')t.hInsta+=s.duree||0;else if(p==='pilotage')t.hPilot+=s.duree||0;else t.hF+=s.duree||0;}
   });return t;
 }
 function kpi(v,l,cls){return '<div class="kpi'+(cls?' '+cls:'')+'"><b>'+v+'</b><small>'+l+'</small></div>';}
@@ -459,9 +505,9 @@ function renderAll(){
   const verts=Object.values(days).filter(d=>d.dm>=5&&d.c>=10).length;
   document.getElementById('sprintKpis').innerHTML=
     kpi(Math.round(sp.cash)+' CHF','Encaissé','dark')+
-    kpi(Math.round(sp.eng)+' CHF','Engagé','dark')+
+    kpi(Math.round(sp.eng)+' CHF','Facturé','dark')+
     kpi(sp.dm,'DM total','dark')+kpi(sp.rdv,'RDV obtenus','dark')+
-    kpi(verts,'Jours verts','dark')+kpi(sp.pprod,'Posts en stock','dark');
+    kpi(verts,'Jours verts','dark')+kpi(sp.pprod,'Posts en stock','dark')+kpi(sp.entretiens,'Entretiens','dark')+kpi(Math.round(sp.hF*10)/10+' h','Formation','dark')+kpi(Math.round(sp.hInsta*10)/10+' h','Instagram (presta)','dark')+kpi(Math.round(sp.hPilot*10)/10+' h','Pilotage (presta)','dark')+kpi('<span class="'+(sp.outilsH>sp.hA?'neg':'')+'">'+Math.round(sp.outilsH*10)/10+' h</span>','Outils / stratégie','dark');
   const pct=Math.min(100,Math.round((sp.cash+sp.eng)/CASH_GOAL*100));
   document.getElementById('gPct').textContent=pct+'%';
   document.getElementById('gFill').style.width=pct+'%';
@@ -486,6 +532,42 @@ function delSession(i){
   if(!confirm('Supprimer cette session ?'))return;
   S.sessions.splice(i,1);save('Supprimée');renderAll();
 }
+function editSession(i){
+  const s=S.sessions[i];editIdx=i;manualMode=true;
+  S.active={type:s.type,client:s.client||null,start:Date.now()};
+  openClose();
+  document.getElementById('manualHead').classList.remove('hidden');
+  document.getElementById('closeTitle').textContent='Modifier la session';
+  document.getElementById('mType').value=s.type;
+  manualType(s.type);
+  document.getElementById('mDate').value=s.date.slice(0,10);
+  document.getElementById('mDuree').value=s.duree||1;
+  ['comptes','likes','comm','dm','rep','rdv','ppub','pprod','idees','entrN'].forEach(k=>{
+    counters[k]=s[k]||0;const el=document.getElementById('s_'+k);if(el)el.textContent=counters[k];
+  });
+  if(s.type==='form'){
+    document.getElementById('fClient').value=s.client||'';
+    document.getElementById('fPresta').value=s.presta||'formation';
+    document.getElementById('fDuree').value=s.duree||1;
+    document.getElementById('fCash').value=s.cash||'';
+    document.getElementById('fDecompte').checked=false; /* évite un double décompte du forfait */
+  }
+  if(s.type==='cash'){
+    document.getElementById('cQui').value=s.qui||'';
+    document.getElementById('cCash').value=s.cash||'';
+    document.getElementById('cFact').value=s.eng||'';
+    counters.entrN=s.entretiens||0;document.getElementById('s_entrN').textContent=counters.entrN;
+  }
+  if(s.type==='prod'){
+    document.getElementById('pOutils').value=s.outilsH||'';
+  }
+  if(s.type==='entr'){
+    document.getElementById('eQui').value=s.qui||'';
+    document.getElementById('eRes').value=s.res||'suite';
+    document.getElementById('eCash').value=s.cash||'';
+    document.getElementById('eEng').value=s.eng||'';
+  }
+}
 function histHTML(list,delBtn){
   if(!list.length)return '<li><small style="color:var(--muted)">Rien encore — lance ta première session.</small></li>';
   return list.map(s=>{
@@ -494,10 +576,11 @@ function histHTML(list,delBtn){
     const when=d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
     let main='',val='';
     if(s.type==='pros'){main=(s.dm||0)+' DM · '+(s.comptes||0)+' comptes · '+(s.rep||0)+' rép.';val=(s.rdv||0)+' RDV';}
-    if(s.type==='form'){main=s.client||'Client';val=(s.cash?Math.round(s.cash)+' CHF · ':'')+(s.duree||0)+'h';}
+    if(s.type==='form'){main=(s.client||'Client')+(s.presta&&s.presta!=='formation'?' · '+s.presta:'');val=(s.cash?Math.round(s.cash)+' CHF · ':'')+(s.duree||0)+'h';}
     if(s.type==='entr'){main=(s.qui||'')+' — '+(s.res||'');val=(s.cash||s.eng)?Math.round((s.cash||0)+(s.eng||0))+' CHF':'';}
+    if(s.type==='cash'){main=(s.qui||'Cash')+' · '+(s.entretiens||0)+' entretien(s)';val=Math.round(s.cash||0)+' / '+Math.round(s.eng||0)+' CHF';}
     if(s.type==='prod'){main=(s.pprod||0)+' produits · '+(s.ppub||0)+' publiés';val=(s.idees||0)+' idées';}
-    const del=delBtn?'<button onclick="delSession('+idx+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button>':'';
+    const del=delBtn?'<button onclick="editSession('+idx+')" style="border:none;background:none;color:var(--teal);font-size:14px;cursor:pointer;padding:4px">✎</button><button onclick="delSession('+idx+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button>':'';
     return '<li><span class="tag '+s.type+'">'+TYPES[s.type].slice(0,5)+'</span><div class="hmain"><b>'+main+'</b><small>'+when+' · '+(s.duree||0)+'h</small></div><div class="hval">'+val+'</div>'+del+'</li>';
   }).join('');
 }
