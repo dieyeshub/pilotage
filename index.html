@@ -383,7 +383,8 @@ function manualType(t){
   document.getElementById('cf-'+t).classList.remove('hidden');
   if(t==='form'){
     const sel=document.getElementById('fClient');
-    sel.innerHTML=S.clients.map(c=>'<option>'+c.nom+'</option>').join('')+'<option>Autre</option>';
+    const names=[...new Set([].concat(S.clients.map(c=>c.nom),S.sessions.filter(x=>x.client).map(x=>x.client)))];
+    sel.innerHTML=names.map(n=>'<option>'+n+'</option>').join('')+'<option>Autre</option>';
     document.getElementById('fDuree').value=document.getElementById('mDuree').value||1;
   }
 }
@@ -399,7 +400,8 @@ function openClose(){
   document.getElementById('closeTitle').textContent='Clore — '+TYPES[S.active.type];
   if(S.active.type==='form'){
     const sel=document.getElementById('fClient');
-    sel.innerHTML=S.clients.map(c=>'<option>'+c.nom+'</option>').join('')+'<option>Autre</option>';
+    const names=[...new Set([].concat(S.clients.map(c=>c.nom),S.sessions.filter(x=>x.client).map(x=>x.client),S.active.client?[S.active.client]:[]))];
+    sel.innerHTML=names.map(n=>'<option>'+n+'</option>').join('')+'<option>Autre</option>';
     if(S.active.client)sel.value=S.active.client;
     const dur=Math.max(.5,Math.round((Date.now()-S.active.start)/1800000)/2);
     document.getElementById('fDuree').value=dur;
@@ -535,7 +537,11 @@ function delSession(i){
 function editSession(i){
   const s=S.sessions[i];editIdx=i;manualMode=true;
   S.active={type:s.type,client:s.client||null,start:Date.now()};
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.getElementById('v-today').classList.add('on');
+  document.querySelectorAll('nav button').forEach((b,i2)=>b.classList.toggle('on',i2===0));
   openClose();
+  window.scrollTo(0,0);
   document.getElementById('manualHead').classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Modifier la session';
   document.getElementById('mType').value=s.type;
