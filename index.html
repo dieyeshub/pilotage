@@ -79,7 +79,8 @@
   .hist li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
   .hist li:last-child{border-bottom:none}
   .tag{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:8px;color:#fff;flex-shrink:0}
-  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr,.tag.cash{background:var(--amber);color:var(--ink-bg)} .tag.prod{background:var(--orange)}
+  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr,.tag.cash{background:var(--amber);color:var(--ink-bg)}
+  .tag.perso{background:#8B8FA8} .tag.prod{background:var(--orange)}
   .hist .hmain{flex:1}
   .hist .hmain b{font-weight:700;display:block}
   .hist .hmain small{color:var(--muted);font-size:11px}
@@ -116,7 +117,7 @@
 <div class="top">
   <div class="wrap" style="max-width:430px;margin:0 auto;padding:0 16px">
     <div class="brand"><h1>Di-Eyes</h1><span>Pilotage CAP</span></div>
-    <div class="sub">Sprint 8 → 25 juillet · objectif <b>+700 CHF</b> avant le départ</div>
+    <div class="sub">Sprint 8 → 25 juillet · objectif <b>+700 CHF</b> avant le départ <span style="opacity:.45;font-size:10px">v6</span></div>
   </div>
 </div>
 
@@ -142,6 +143,7 @@
         <button class="tbtn t-entr" onclick="startSession('cash')"><b>Cash</b><small>encaissé · facturé · entretiens</small></button>
         <button class="tbtn t-prod" onclick="startSession('prod')"><b>Production</b><small>posts · idées</small></button>
       </div>
+      <button class="tbtn" style="background:#8B8FA8;width:100%;margin-top:10px" onclick="startSession('perso')"><b>Perso</b><small>sommeil · énergie · imprévu — hors CAP</small></button>
       <button class="btn ghost" onclick="openManual()">＋ Saisir une session manuellement</button>
     </div>
 
@@ -156,6 +158,7 @@
           <option value="form">Formation</option>
           <option value="cash">Cash</option>
           <option value="prod">Production</option>
+          <option value="perso">Perso</option>
         </select>
         <div class="grid2">
           <div><label class="f">Date</label><input class="f" type="date" id="mDate"></div>
@@ -216,6 +219,25 @@
           <div><label class="f">Encaissé (CHF)</label><input class="f" type="number" id="eCash" placeholder="0"></div>
           <div><label class="f">Engagé (CHF)</label><input class="f" type="number" id="eEng" placeholder="0"></div>
         </div>
+      </div>
+
+      <div id="cf-perso" class="hidden">
+        <label class="f" style="margin-top:0">Catégorie</label>
+        <select class="f" id="pCat">
+          <option value="sommeil">Sommeil / repos</option>
+          <option value="sport">Sport</option>
+          <option value="creativite">Créativité / projets</option>
+          <option value="environnement">Environnement</option>
+          <option value="finance">Finance</option>
+          <option value="imprevu">Imprévu / charge mentale</option>
+          <option value="autre">Autre</option>
+        </select>
+        <label class="f">Énergie ressentie</label>
+        <div class="stx" style="justify-content:space-between;width:100%">
+          <button onclick="st('energie',-1)" style="flex:1">−</button><span class="n" id="s_energie" style="flex:2">3</span><button onclick="st('energie',1)" style="flex:1">+</button>
+        </div>
+        <label class="f">Note libre</label>
+        <input class="f" type="text" id="pNote" placeholder="Ce qui pèse ou ce qui aide">
       </div>
 
       <div id="cf-prod" class="hidden">
@@ -287,20 +309,77 @@
     </div>
   </div>
 
+
+  <!-- ═══ VUE PERSO ═══ -->
+  <div class="view" id="v-perso">
+
+    <div class="card live hidden" id="pLiveCard">
+      <div class="type" id="pLiveType"></div>
+      <div class="clock"><span class="pulse"></span><span id="pLiveClock">00:00</span></div>
+      <button class="btn stop" onclick="pOpenClose()">Clore</button>
+    </div>
+
+    <div class="card" id="pStartCard">
+      <h2 class="sec">Lancer un temps perso</h2>
+      <div class="types" id="pTypes"></div>
+      <button class="btn ghost" onclick="pOpenManual()">＋ Saisir manuellement</button>
+    </div>
+
+    <div class="card hidden" id="pCloseCard">
+      <h2 class="sec" id="pCloseTitle">Clore</h2>
+      <label class="f" style="margin-top:0">Catégorie</label>
+      <select class="f" id="pCat"></select>
+      <div class="grid2">
+        <div><label class="f">Date</label><input class="f" type="date" id="pDate"></div>
+        <div><label class="f">Durée (h)</label><input class="f" type="number" step="0.25" id="pDuree"></div>
+      </div>
+      <label class="f">Énergie après (1 = vidé · 5 = rechargé)</label>
+      <select class="f" id="pEner">
+        <option value="3">3 — neutre</option>
+        <option value="1">1 — vidé</option>
+        <option value="2">2 — fatigué</option>
+        <option value="4">4 — bien</option>
+        <option value="5">5 — rechargé</option>
+      </select>
+      <label class="f">Note (facultatif)</label>
+      <input class="f" type="text" id="pNote" placeholder="Ex : sortie vélo, lecture…">
+      <div style="margin-top:16px">
+        <button class="btn main" onclick="pSave()">Enregistrer</button>
+        <button class="btn ghost" onclick="pCancel()">Annuler</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">7 derniers jours</h2>
+      <div class="kpis" id="pKpis"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Équilibre</h2>
+      <div id="pBalance"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Historique perso</h2>
+      <ul class="hist" id="pHist"></ul>
+    </div>
+  </div>
+
 </div>
 
 <nav>
   <button class="on" onclick="tab('today',this)"><i>▶</i>Aujourd'hui</button>
   <button onclick="tab('pilot',this)"><i>◎</i>Pilotage</button>
   <button onclick="tab('forf',this)"><i>⧗</i>Forfaits</button>
+  <button onclick="tab('perso',this)"><i>♁</i>Perso</button>
 </nav>
 <div class="toast" id="toast"></div>
 
 <script>
 const KEY='dieyes-pilot-v1';
-const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production'};
+const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production',perso:'Perso'};
 const SPRINT_START='2026-07-08',SPRINT_END='2026-07-25',CASH_GOAL=700;
-let S={sessions:[],clients:[],active:null,coutH:30};
+let S={sessions:[],clients:[],perso:[],active:null,pactive:null,coutH:30};
 let counters={},clockTimer=null;
 
 async function readStore(){
@@ -317,7 +396,8 @@ async function load(){
   
   document.getElementById('coutH').value=S.coutH;
   initLock();
-  renderAll();if(S.active)startClock();
+  if(!S.perso)S.perso=[];
+  renderAll();if(S.active)startClock();if(S.pactive)pStartClock();
 }
 function initLock(){
   if(!S.pin)document.getElementById('lockLbl').textContent='Première ouverture — créez votre code (4 chiffres minimum)';
@@ -379,7 +459,7 @@ function openManual(){
 }
 function manualType(t){
   S.active.type=t;
-  ['pros','form','cash','entr','prod'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
+  ['pros','form','cash','entr','prod','perso'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
   document.getElementById('cf-'+t).classList.remove('hidden');
   if(t==='form'){
     const sel=document.getElementById('fClient');
@@ -391,11 +471,12 @@ function manualType(t){
 function openClose(){
   counters={};
   ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
+  counters.energie=3;const eg=document.getElementById('s_energie');if(eg)eg.textContent='3';
   document.getElementById('startCard').classList.add('hidden');
   document.getElementById('liveCard').classList.add('hidden');
   const cc=document.getElementById('closeCard');cc.classList.remove('hidden');
   if(!manualMode)document.getElementById('manualHead').classList.add('hidden');
-  ['pros','form','cash','entr','prod'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
+  ['pros','form','cash','entr','prod','perso'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
   document.getElementById('cf-'+S.active.type).classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Clore — '+TYPES[S.active.type];
   if(S.active.type==='form'){
@@ -411,7 +492,7 @@ function cancelClose(){
   if(manualMode){S.active=null;manualMode=false;editIdx=null;}
   document.getElementById('closeCard').classList.add('hidden');renderAll();
 }
-function st(k,n){counters[k]=Math.max(0,(counters[k]||0)+n);document.getElementById('s_'+k).textContent=counters[k];}
+function st(k,n){const min=k==='energie'?1:0,max=k==='energie'?5:999;counters[k]=Math.min(max,Math.max(min,(counters[k]||(k==='energie'?3:0))+n));document.getElementById('s_'+k).textContent=counters[k];}
 
 function saveClose(){
   const a=S.active;if(!a)return;
@@ -440,6 +521,11 @@ function saveClose(){
     sess.res=document.getElementById('eRes').value;
     sess.cash=parseFloat(document.getElementById('eCash').value)||0;
     sess.eng=parseFloat(document.getElementById('eEng').value)||0;
+  }
+  if(a.type==='perso'){
+    sess.cat=document.getElementById('pCat').value;
+    sess.energie=counters.energie||3;
+    sess.note=document.getElementById('pNote').value;
   }
   if(a.type==='cash'){
     sess.qui=document.getElementById('cQui').value;
@@ -558,6 +644,11 @@ function editSession(i){
     document.getElementById('fCash').value=s.cash||'';
     document.getElementById('fDecompte').checked=false; /* évite un double décompte du forfait */
   }
+  if(s.type==='perso'){
+    document.getElementById('pCat').value=s.cat||'sommeil';
+    counters.energie=s.energie||3;document.getElementById('s_energie').textContent=counters.energie;
+    document.getElementById('pNote').value=s.note||'';
+  }
   if(s.type==='cash'){
     document.getElementById('cQui').value=s.qui||'';
     document.getElementById('cCash').value=s.cash||'';
@@ -585,10 +676,124 @@ function histHTML(list,delBtn){
     if(s.type==='form'){main=(s.client||'Client')+(s.presta&&s.presta!=='formation'?' · '+s.presta:'');val=(s.cash?Math.round(s.cash)+' CHF · ':'')+(s.duree||0)+'h';}
     if(s.type==='entr'){main=(s.qui||'')+' — '+(s.res||'');val=(s.cash||s.eng)?Math.round((s.cash||0)+(s.eng||0))+' CHF':'';}
     if(s.type==='cash'){main=(s.qui||'Cash')+' · '+(s.entretiens||0)+' entretien(s)';val=Math.round(s.cash||0)+' / '+Math.round(s.eng||0)+' CHF';}
+    if(s.type==='perso'){main=(s.cat||'')+(s.note?' — '+s.note:'');val='Énergie '+(s.energie||3)+'/5';}
     if(s.type==='prod'){main=(s.pprod||0)+' produits · '+(s.ppub||0)+' publiés';val=(s.idees||0)+' idées';}
     const del=delBtn?'<button onclick="editSession('+idx+')" style="border:none;background:none;color:var(--teal);font-size:14px;cursor:pointer;padding:4px">✎</button><button onclick="delSession('+idx+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button>':'';
     return '<li><span class="tag '+s.type+'">'+TYPES[s.type].slice(0,5)+'</span><div class="hmain"><b>'+main+'</b><small>'+when+' · '+(s.duree||0)+'h</small></div><div class="hval">'+val+'</div>'+del+'</li>';
   }).join('');
+}
+
+/* ═══ PERSO ═══ */
+const PCATS=[
+ {k:'sport',l:'Sport',c:'var(--green)'},
+ {k:'maison',l:'Maison / ménage',c:'var(--teal)'},
+ {k:'inspi',l:'Inspiration',c:'var(--amber)'},
+ {k:'formation',l:'Formation perso',c:'var(--orange)'},
+ {k:'travaux',l:'Travaux',c:'var(--teal-deep)'},
+ {k:'repos',l:'Repos / lien',c:'#7A9E8E'}
+];
+let pClockTimer=null,pManual=false,pEditIdx=null;
+
+function pLabel(k){const c=PCATS.find(x=>x.k===k);return c?c.l:k;}
+function pInitUI(){
+  document.getElementById('pTypes').innerHTML=PCATS.map(c=>
+    '<button class="tbtn" style="background:'+c.c+';'+(c.k==='inspi'?'color:var(--ink)':'')+'" onclick="pStart(\''+c.k+'\')"><b>'+c.l+'</b></button>').join('');
+  document.getElementById('pCat').innerHTML=PCATS.map(c=>'<option value="'+c.k+'">'+c.l+'</option>').join('');
+}
+function pStart(k){
+  if(S.pactive){toast('Un temps perso est déjà lancé');return;}
+  S.pactive={cat:k,start:Date.now()};save();renderPerso();pStartClock();
+}
+function pStartClock(){
+  clearInterval(pClockTimer);
+  pClockTimer=setInterval(()=>{
+    if(!S.pactive)return;
+    const s=Math.floor((Date.now()-S.pactive.start)/1000);
+    const h=Math.floor(s/3600),m=Math.floor(s%3600/60);
+    document.getElementById('pLiveClock').textContent=(h>0?h+':':'')+String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+}
+function pOpenClose(){
+  document.getElementById('pStartCard').classList.add('hidden');
+  document.getElementById('pLiveCard').classList.add('hidden');
+  document.getElementById('pCloseCard').classList.remove('hidden');
+  document.getElementById('pCloseTitle').textContent=pManual?'Saisie manuelle':'Clore — '+pLabel(S.pactive.cat);
+  document.getElementById('pCat').value=S.pactive.cat;
+  document.getElementById('pDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('pDuree').value=pManual?1:Math.max(.25,Math.round((Date.now()-S.pactive.start)/900000)/4);
+  document.getElementById('pEner').value='3';
+  document.getElementById('pNote').value='';
+}
+function pOpenManual(){pManual=true;S.pactive={cat:'sport',start:Date.now()};pOpenClose();}
+function pEdit(i){
+  const e=S.perso[i];pEditIdx=i;pManual=true;S.pactive={cat:e.cat,start:Date.now()};
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-perso').classList.add('on');
+  document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',j===3));
+  pOpenClose();window.scrollTo(0,0);
+  document.getElementById('pCloseTitle').textContent='Modifier';
+  document.getElementById('pCat').value=e.cat;
+  document.getElementById('pDate').value=e.date.slice(0,10);
+  document.getElementById('pDuree').value=e.duree;
+  document.getElementById('pEner').value=String(e.ener||3);
+  document.getElementById('pNote').value=e.note||'';
+}
+function pSave(){
+  const e={
+    cat:document.getElementById('pCat').value,
+    date:(document.getElementById('pDate').value||new Date().toISOString().slice(0,10))+'T12:00:00.000Z',
+    duree:parseFloat(document.getElementById('pDuree').value)||0.25,
+    ener:parseInt(document.getElementById('pEner').value)||3,
+    note:document.getElementById('pNote').value
+  };
+  if(pEditIdx!==null){S.perso[pEditIdx]=e;pEditIdx=null;}else{S.perso.unshift(e);}
+  S.perso.sort((a,b)=>b.date.localeCompare(a.date));
+  S.pactive=null;pManual=false;clearInterval(pClockTimer);
+  document.getElementById('pCloseCard').classList.add('hidden');
+  save('Enregistré ✓');renderPerso();
+}
+function pCancel(){
+  if(pManual||pEditIdx!==null){S.pactive=null;pManual=false;pEditIdx=null;}
+  document.getElementById('pCloseCard').classList.add('hidden');renderPerso();
+}
+function pDel(i){if(!confirm('Supprimer ?'))return;S.perso.splice(i,1);save('Supprimé');renderPerso();}
+
+function renderPerso(){
+  if(!document.getElementById('pTypes').innerHTML)pInitUI();
+  const on=!!S.pactive&&!pManual&&pEditIdx===null;
+  const closing=!document.getElementById('pCloseCard').classList.contains('hidden');
+  document.getElementById('pLiveCard').classList.toggle('hidden',!on||closing);
+  document.getElementById('pStartCard').classList.toggle('hidden',on||closing);
+  if(on)document.getElementById('pLiveType').textContent=pLabel(S.pactive.cat);
+  /* 7 derniers jours */
+  const lim=new Date(Date.now()-7*86400000).toISOString();
+  const week=S.perso.filter(e=>e.date>=lim);
+  const byCat={};let tot=0,enerSum=0;
+  week.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+e.duree;tot+=e.duree;enerSum+=(e.ener||3)*e.duree;});
+  document.getElementById('pKpis').innerHTML=PCATS.map(c=>
+    kpi((Math.round((byCat[c.k]||0)*10)/10)+' h',c.l,(byCat[c.k]?'':'')) ).join('');
+  /* équilibre : perso vs pro sur 7 jours */
+  const proH=S.sessions.filter(s=>s.date>=lim).reduce((a,s)=>a+(s.duree||0),0);
+  const ratio=proH?Math.round(tot/proH*100):0;
+  const meilleure=Object.keys(byCat).sort((a,b)=>{
+    const ea=week.filter(e=>e.cat===a).reduce((x,e)=>x+(e.ener||3),0)/Math.max(1,week.filter(e=>e.cat===a).length);
+    const eb=week.filter(e=>e.cat===b).reduce((x,e)=>x+(e.ener||3),0)/Math.max(1,week.filter(e=>e.cat===b).length);
+    return eb-ea;})[0];
+  document.getElementById('pBalance').innerHTML=
+    '<div class="kpis">'+kpi(Math.round(tot*10)/10+' h','Perso (7 j)')+kpi(Math.round(proH*10)/10+' h','Pro (7 j)')+
+    kpi(ratio+' %','Perso / pro')+kpi(tot?(Math.round(enerSum/tot*10)/10):'—','Énergie moyenne')+'</div>'+
+    (meilleure?'<div style="font-size:12px;color:var(--muted);margin-top:10px">Ce qui te recharge le plus en ce moment : <b style="color:var(--teal)">'+pLabel(meilleure)+'</b></div>':'');
+  /* historique */
+  const H=S.perso;
+  document.getElementById('pHist').innerHTML=H.length?H.slice(0,40).map((e,i)=>{
+    const d=new Date(e.date);
+    const when=d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'});
+    return '<li><span class="tag" style="background:'+(PCATS.find(c=>c.k===e.cat)||{c:'var(--teal)'}).c+'">'+pLabel(e.cat).slice(0,5)+'</span>'+
+      '<div class="hmain"><b>'+(e.note||pLabel(e.cat))+'</b><small>'+when+' · énergie '+(e.ener||3)+'/5</small></div>'+
+      '<div class="hval">'+e.duree+'h</div>'+
+      '<button onclick="pEdit('+i+')" style="border:none;background:none;color:var(--teal);font-size:14px;cursor:pointer;padding:4px">✎</button>'+
+      '<button onclick="pDel('+i+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button></li>';
+  }).join(''):'<li><small style="color:var(--muted)">Rien encore.</small></li>';
 }
 load();
 </script>
