@@ -109,8 +109,8 @@
 
 <div id="lock" style="position:fixed;inset:0;background:linear-gradient(160deg,#0F2E2E,#1E4747);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
   <div style="color:#fff;font-size:19px;font-weight:800;margin-bottom:4px">Di-Eyes <span style="color:#F8B346;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">Pilotage</span></div>
-  <div id="lockLbl" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:16px">Code d'accès</div>
-  <input id="lockPin" type="password" autocapitalize="off" autocorrect="off" style="width:220px;padding:13px;border:none;border-radius:12px;font-family:inherit;font-size:18px;font-weight:800;text-align:center;letter-spacing:.15em" onkeydown="if(event.key==='Enter')submitPin()">
+  <div id="lockLbl" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:16px">Clé d'accès personnelle</div>
+  <input id="diAccess" name="diAccessField" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:220px;padding:13px;border:none;border-radius:12px;font-family:inherit;font-size:18px;font-weight:800;text-align:center;letter-spacing:.15em" onkeydown="if(event.key==='Enter')submitPin()">
   <button onclick="submitPin()" style="margin-top:12px;width:180px;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:14px;font-weight:800;background:#F8B346;color:#0F2E2E;cursor:pointer">Entrer</button>
 </div>
 
@@ -229,6 +229,7 @@
           <option value="creativite">Créativité / projets</option>
           <option value="environnement">Environnement</option>
           <option value="finance">Finance</option>
+          <option value="organisation">Organisation</option>
           <option value="imprevu">Imprévu / charge mentale</option>
           <option value="autre">Autre</option>
         </select>
@@ -400,15 +401,15 @@ async function load(){
   renderAll();if(S.active)startClock();if(S.pactive)pStartClock();
 }
 function initLock(){
-  if(!S.pin)document.getElementById('lockLbl').textContent='Première ouverture — créez votre code (4 chiffres minimum)';
-  document.getElementById('lockPin').focus();
+  if(!S.pin)document.getElementById('lockLbl').textContent='Première ouverture — créez votre clé (4 caractères minimum)';
+  document.getElementById('diAccess').focus();
 }
 async function submitPin(){
-  const v=document.getElementById('lockPin').value.trim();
+  const v=document.getElementById('diAccess').value.trim();
   if(!S.pin){
     if(v.length<4){toast('4 chiffres minimum');return;}
     S.pin=v;await save('Code créé ✓');
-  }else if(v!==S.pin){toast('Code incorrect');document.getElementById('lockPin').value='';return;}
+  }else if(v!==S.pin){toast('Code incorrect');document.getElementById('diAccess').value='';return;}
   document.getElementById('lock').style.display='none';
 }
 async function save(msg){
