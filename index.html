@@ -112,6 +112,8 @@
   <div id="lockLbl" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:16px">Clé d'accès personnelle</div>
   <input id="diAccess" name="diAccessField" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:220px;padding:13px;border:none;border-radius:12px;font-family:inherit;font-size:18px;font-weight:800;text-align:center;letter-spacing:.15em" onkeydown="if(event.key==='Enter')submitPin()">
   <button onclick="submitPin()" style="margin-top:12px;width:180px;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:14px;font-weight:800;background:#F8B346;color:#0F2E2E;cursor:pointer">Entrer</button>
+  <button onclick="resetPin()" style="margin-top:14px;background:none;border:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Code oublié ? Réinitialiser</button>
+  <button onclick="resetPin()" style="margin-top:14px;background:none;border:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Clé oubliée ? Réinitialiser</button>
 </div>
 
 <div class="top">
@@ -411,6 +413,16 @@ async function submitPin(){
     S.pin=v;await save('Code créé ✓');
   }else if(v!==S.pin){toast('Code incorrect');document.getElementById('diAccess').value='';return;}
   document.getElementById('lock').style.display='none';
+}
+async function resetPin(){
+  const code=prompt('Code de sécurité :');
+  if(code===null)return;
+  if(code.trim()!=='7744'){toast('Code de sécurité incorrect');return;}
+  delete S.pin;
+  await save('Code réinitialisé');
+  document.getElementById('lockLbl').textContent='Créez votre nouveau code (4 caractères minimum)';
+  document.getElementById('diAccess').value='';
+  document.getElementById('diAccess').focus();
 }
 async function save(msg){
   const ok=await writeStore(JSON.stringify(S));
