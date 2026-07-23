@@ -79,8 +79,7 @@
   .hist li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
   .hist li:last-child{border-bottom:none}
   .tag{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:8px;color:#fff;flex-shrink:0}
-  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr,.tag.cash{background:var(--amber);color:var(--ink-bg)}
-  .tag.perso{background:#8B8FA8} .tag.prod{background:var(--orange)}
+  .tag.pros{background:var(--teal)} .tag.form{background:var(--green)} .tag.entr,.tag.cash{background:var(--amber);color:var(--ink-bg)} .tag.prod{background:var(--orange)}
   .hist .hmain{flex:1}
   .hist .hmain b{font-weight:700;display:block}
   .hist .hmain small{color:var(--muted);font-size:11px}
@@ -145,7 +144,6 @@
         <button class="tbtn t-entr" onclick="startSession('cash')"><b>Cash</b><small>encaissé · facturé · entretiens</small></button>
         <button class="tbtn t-prod" onclick="startSession('prod')"><b>Production</b><small>posts · idées</small></button>
       </div>
-      <button class="tbtn" style="background:#8B8FA8;width:100%;margin-top:10px" onclick="startSession('perso')"><b>Perso</b><small>sommeil · énergie · imprévu — hors CAP</small></button>
       <button class="btn ghost" onclick="openManual()">＋ Saisir une session manuellement</button>
     </div>
 
@@ -160,7 +158,6 @@
           <option value="form">Formation</option>
           <option value="cash">Cash</option>
           <option value="prod">Production</option>
-          <option value="perso">Perso</option>
         </select>
         <div class="grid2">
           <div><label class="f">Date</label><input class="f" type="date" id="mDate"></div>
@@ -169,6 +166,13 @@
       </div>
 
       <div id="cf-pros" class="hidden">
+        <label class="f" style="margin-top:0">Persona ciblé</label>
+        <select class="f" id="prPersona">
+          <option value="sofia">Type Sofia (créative solo — coiffure/esthétique/fleuriste)</option>
+          <option value="claire">Type Claire (particulier / senior)</option>
+          <option value="pg">Personal Genius (particulier formation)</option>
+          <option value="autre">Autre / hors persona</option>
+        </select>
         <div class="step"><label>Nouveaux comptes qualifiés touchés</label><div class="stx"><button onclick="st('comptes',-1)">−</button><span class="n" id="s_comptes">0</span><button onclick="st('comptes',1)">+</button></div></div>
         <div class="step"><label>Likes</label><div class="stx"><button onclick="st('likes',-5)">−5</button><span class="n" id="s_likes">0</span><button onclick="st('likes',5)">+5</button></div></div>
         <div class="step"><label>Commentaires</label><div class="stx"><button onclick="st('comm',-1)">−</button><span class="n" id="s_comm">0</span><button onclick="st('comm',1)">+</button></div></div>
@@ -176,6 +180,12 @@
         <div class="step"><label>Réponses reçues</label><div class="stx"><button onclick="st('rep',-1)">−</button><span class="n" id="s_rep">0</span><button onclick="st('rep',1)">+</button></div></div>
         <div class="step"><label>Rendez-vous obtenus</label><div class="stx"><button onclick="st('rdv',-1)">−</button><span class="n" id="s_rdv">0</span><button onclick="st('rdv',1)">+</button></div></div>
         <div class="step"><label>Posts publiés</label><div class="stx"><button onclick="st('ppub',-1)">−</button><span class="n" id="s_ppub">0</span><button onclick="st('ppub',1)">+</button></div></div>
+        <div class="step"><label>Repartages faits (stories)</label><div class="stx"><button onclick="st('repFaits',-1)">−</button><span class="n" id="s_repFaits">0</span><button onclick="st('repFaits',1)">+</button></div></div>
+        <label class="f" style="margin-top:16px;color:var(--teal)">Résultats différés (repartages d'hier/avant-hier)</label>
+        <div class="step"><label>Repartages reçus</label><div class="stx"><button onclick="st('repart',-1)">−</button><span class="n" id="s_repart">0</span><button onclick="st('repart',1)">+</button></div></div>
+        <div class="step"><label>Réponses stories</label><div class="stx"><button onclick="st('repStory',-1)">−</button><span class="n" id="s_repStory">0</span><button onclick="st('repStory',1)">+</button></div></div>
+        <div class="step"><label>Nouveaux abonnés</label><div class="stx"><button onclick="st('nvAbo',-1)">−</button><span class="n" id="s_nvAbo">0</span><button onclick="st('nvAbo',1)">+</button></div></div>
+        <div class="step"><label>DM différés reçus</label><div class="stx"><button onclick="st('dmDiff',-1)">−</button><span class="n" id="s_dmDiff">0</span><button onclick="st('dmDiff',1)">+</button></div></div>
       </div>
 
       <div id="cf-form" class="hidden">
@@ -223,27 +233,14 @@
         </div>
       </div>
 
-      <div id="cf-perso" class="hidden">
-        <label class="f" style="margin-top:0">Catégorie</label>
-        <select class="f" id="pCat">
-          <option value="sommeil">Sommeil / repos</option>
-          <option value="sport">Sport</option>
-          <option value="creativite">Créativité / projets</option>
-          <option value="environnement">Environnement</option>
-          <option value="finance">Finance</option>
-          <option value="organisation">Organisation</option>
-          <option value="imprevu">Imprévu / charge mentale</option>
+      <div id="cf-prod" class="hidden">
+        <label class="f" style="margin-top:0">Type de production</label>
+        <select class="f" id="pdType">
+          <option value="contenu">Contenu (posts)</option>
+          <option value="outils">Outils / stratégie</option>
+          <option value="organisation">Organisation / rangement</option>
           <option value="autre">Autre</option>
         </select>
-        <label class="f">Énergie ressentie</label>
-        <div class="stx" style="justify-content:space-between;width:100%">
-          <button onclick="st('energie',-1)" style="flex:1">−</button><span class="n" id="s_energie" style="flex:2">3</span><button onclick="st('energie',1)" style="flex:1">+</button>
-        </div>
-        <label class="f">Note libre</label>
-        <input class="f" type="text" id="pNote" placeholder="Ce qui pèse ou ce qui aide">
-      </div>
-
-      <div id="cf-prod" class="hidden">
         <div class="step"><label>Posts produits (stock)</label><div class="stx"><button onclick="st('pprod',-1)">−</button><span class="n" id="s_pprod">0</span><button onclick="st('pprod',1)">+</button></div></div>
         <div class="step"><label>Idées notées</label><div class="stx"><button onclick="st('idees',-1)">−</button><span class="n" id="s_idees">0</span><button onclick="st('idees',1)">+</button></div></div>
         <label class="f">Heures outils / stratégie / process (surveillance)</label>
@@ -380,7 +377,7 @@
 
 <script>
 const KEY='dieyes-pilot-v1';
-const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production',perso:'Perso'};
+const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production'};
 const SPRINT_START='2026-07-08',SPRINT_END='2026-07-25',CASH_GOAL=700;
 let S={sessions:[],clients:[],perso:[],active:null,pactive:null,coutH:30};
 let counters={},clockTimer=null;
@@ -472,7 +469,7 @@ function openManual(){
 }
 function manualType(t){
   S.active.type=t;
-  ['pros','form','cash','entr','prod','perso'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
+  ['pros','form','cash','entr','prod'].forEach(x=>document.getElementById('cf-'+x).classList.add('hidden'));
   document.getElementById('cf-'+t).classList.remove('hidden');
   if(t==='form'){
     const sel=document.getElementById('fClient');
@@ -483,13 +480,13 @@ function manualType(t){
 }
 function openClose(){
   counters={};
-  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
+  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
   counters.energie=3;const eg=document.getElementById('s_energie');if(eg)eg.textContent='3';
   document.getElementById('startCard').classList.add('hidden');
   document.getElementById('liveCard').classList.add('hidden');
   const cc=document.getElementById('closeCard');cc.classList.remove('hidden');
   if(!manualMode)document.getElementById('manualHead').classList.add('hidden');
-  ['pros','form','cash','entr','prod','perso'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
+  ['pros','form','cash','entr','prod'].forEach(t=>document.getElementById('cf-'+t).classList.add('hidden'));
   document.getElementById('cf-'+S.active.type).classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Clore — '+TYPES[S.active.type];
   if(S.active.type==='form'){
@@ -517,7 +514,7 @@ function saveClose(){
     if(d)when=d+'T12:00:00.000Z';
   }
   const sess={type:a.type,date:when,duree:dureeH,cash:0,eng:0};
-  if(a.type==='pros'){Object.assign(sess,counters);}
+  if(a.type==='pros'){sess.persona=document.getElementById('prPersona').value;Object.assign(sess,counters);}
   if(a.type==='prod'){Object.assign(sess,{pprod:counters.pprod,idees:counters.idees,outilsH:parseFloat(document.getElementById('pOutils').value)||0});}
   if(a.type==='form'){
     sess.client=document.getElementById('fClient').value;
@@ -534,11 +531,6 @@ function saveClose(){
     sess.res=document.getElementById('eRes').value;
     sess.cash=parseFloat(document.getElementById('eCash').value)||0;
     sess.eng=parseFloat(document.getElementById('eEng').value)||0;
-  }
-  if(a.type==='perso'){
-    sess.cat=document.getElementById('pCat').value;
-    sess.energie=counters.energie||3;
-    sess.note=document.getElementById('pNote').value;
   }
   if(a.type==='cash'){
     sess.qui=document.getElementById('cQui').value;
@@ -635,6 +627,7 @@ function delSession(i){
 }
 function editSession(i){
   const s=S.sessions[i];editIdx=i;manualMode=true;
+  setTimeout(()=>{const pp=document.getElementById('prPersona');if(pp&&s.persona)pp.value=s.persona;},0);
   S.active={type:s.type,client:s.client||null,start:Date.now()};
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
   document.getElementById('v-today').classList.add('on');
@@ -647,7 +640,7 @@ function editSession(i){
   manualType(s.type);
   document.getElementById('mDate').value=s.date.slice(0,10);
   document.getElementById('mDuree').value=s.duree||1;
-  ['comptes','likes','comm','dm','rep','rdv','ppub','pprod','idees','entrN'].forEach(k=>{
+  ['comptes','likes','comm','dm','rep','rdv','ppub','pprod','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits'].forEach(k=>{
     counters[k]=s[k]||0;const el=document.getElementById('s_'+k);if(el)el.textContent=counters[k];
   });
   if(s.type==='form'){
@@ -656,11 +649,6 @@ function editSession(i){
     document.getElementById('fDuree').value=s.duree||1;
     document.getElementById('fCash').value=s.cash||'';
     document.getElementById('fDecompte').checked=false; /* évite un double décompte du forfait */
-  }
-  if(s.type==='perso'){
-    document.getElementById('pCat').value=s.cat||'sommeil';
-    counters.energie=s.energie||3;document.getElementById('s_energie').textContent=counters.energie;
-    document.getElementById('pNote').value=s.note||'';
   }
   if(s.type==='cash'){
     document.getElementById('cQui').value=s.qui||'';
@@ -685,11 +673,10 @@ function histHTML(list,delBtn){
     const d=new Date(s.date);
     const when=d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
     let main='',val='';
-    if(s.type==='pros'){main=(s.dm||0)+' DM · '+(s.comptes||0)+' comptes · '+(s.rep||0)+' rép.';val=(s.rdv||0)+' RDV';}
+    if(s.type==='pros'){const pn={sofia:'Sofia',claire:'Claire',pg:'PG',autre:'Autre'}[s.persona]||'';main=(pn?'['+pn+'] ':'')+(s.dm||0)+' DM · '+(s.comptes||0)+' comptes'+(s.repFaits?' · '+s.repFaits+' repart.':'')+((s.repart||s.nvAbo)?' · reçu: '+(s.repart||0)+'/'+(s.nvAbo||0)+' abo.':'');val=(s.rdv||0)+' RDV';}
     if(s.type==='form'){main=(s.client||'Client')+(s.presta&&s.presta!=='formation'?' · '+s.presta:'');val=(s.cash?Math.round(s.cash)+' CHF · ':'')+(s.duree||0)+'h';}
     if(s.type==='entr'){main=(s.qui||'')+' — '+(s.res||'');val=(s.cash||s.eng)?Math.round((s.cash||0)+(s.eng||0))+' CHF':'';}
     if(s.type==='cash'){main=(s.qui||'Cash')+' · '+(s.entretiens||0)+' entretien(s)';val=Math.round(s.cash||0)+' / '+Math.round(s.eng||0)+' CHF';}
-    if(s.type==='perso'){main=(s.cat||'')+(s.note?' — '+s.note:'');val='Énergie '+(s.energie||3)+'/5';}
     if(s.type==='prod'){main=(s.pprod||0)+' produits · '+(s.ppub||0)+' publiés';val=(s.idees||0)+' idées';}
     const del=delBtn?'<button onclick="editSession('+idx+')" style="border:none;background:none;color:var(--teal);font-size:14px;cursor:pointer;padding:4px">✎</button><button onclick="delSession('+idx+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button>':'';
     return '<li><span class="tag '+s.type+'">'+TYPES[s.type].slice(0,5)+'</span><div class="hmain"><b>'+main+'</b><small>'+when+' · '+(s.duree||0)+'h</small></div><div class="hval">'+val+'</div>'+del+'</li>';
