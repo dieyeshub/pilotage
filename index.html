@@ -613,7 +613,7 @@ function renderAll(){
     kpi(t.comptes+' / 10','Comptes qualifiés',t.comptes>=10?'dark':'')+
     kpi(Math.round(t.cash)+' CHF','Encaissé')+
     kpi(vert?'✓ VERT':'Orange','Journée '+(vert?'gagnée':'en cours'));
-  document.getElementById('histToday').innerHTML=histHTML(tl.slice(0,6));
+  document.getElementById('histToday').innerHTML=histHTML(tl.slice(0,6),true);
   /* sprint */
   const sl=S.sessions.filter(s=>inSprint(s.date));
   const sp=agg(sl);
