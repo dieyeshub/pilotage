@@ -179,6 +179,8 @@
         <div class="step"><label>Messages privés (DM)</label><div class="stx"><button onclick="st('dm',-1)">−</button><span class="n" id="s_dm">0</span><button onclick="st('dm',1)">+</button></div></div>
         <div class="step"><label>Réponses reçues</label><div class="stx"><button onclick="st('rep',-1)">−</button><span class="n" id="s_rep">0</span><button onclick="st('rep',1)">+</button></div></div>
         <div class="step"><label>Rendez-vous obtenus</label><div class="stx"><button onclick="st('rdv',-1)">−</button><span class="n" id="s_rdv">0</span><button onclick="st('rdv',1)">+</button></div></div>
+        <div class="step"><label style="color:var(--amber);font-weight:800">Prospects qualifiés (conversation business engagée)</label><div class="stx"><button onclick="st('prospectQ',-1)">−</button><span class="n" id="s_prospectQ">0</span><button onclick="st('prospectQ',1)">+</button></div></div>
+        <div class="step"><label style="color:#8B5FBF;font-weight:800">Promoteurs recrutés (client ou contact converti)</label><div class="stx"><button onclick="st('promo',-1)">−</button><span class="n" id="s_promo">0</span><button onclick="st('promo',1)">+</button></div></div>
         <div class="step"><label>Posts publiés</label><div class="stx"><button onclick="st('ppub',-1)">−</button><span class="n" id="s_ppub">0</span><button onclick="st('ppub',1)">+</button></div></div>
         <div class="step"><label>Repartages faits (stories)</label><div class="stx"><button onclick="st('repFaits',-1)">−</button><span class="n" id="s_repFaits">0</span><button onclick="st('repFaits',1)">+</button></div></div>
         <label class="f" style="margin-top:16px;color:var(--teal)">Résultats différés (repartages d'hier/avant-hier)</label>
@@ -213,6 +215,8 @@
           <div><label class="f">Encaissé (CHF)</label><input class="f" type="number" id="cCash" placeholder="0"></div>
           <div><label class="f">Facturé (CHF)</label><input class="f" type="number" id="cFact" placeholder="0"></div>
         </div>
+        <label class="f">Frais / charges liés (CHF) <span style="font-weight:400;color:var(--muted)">— sous-traitant, frais bancaires, abonnement, achat</span></label>
+        <input class="f" type="number" id="cFrais" placeholder="0">
         <div class="step" style="margin-top:10px"><label>Entretiens menés</label><div class="stx"><button onclick="st('entrN',-1)">−</button><span class="n" id="s_entrN">0</span><button onclick="st('entrN',1)">+</button></div></div>
       </div>
 
@@ -273,6 +277,22 @@
       <div class="goalbar" style="margin-top:12px">
         <div class="gl" style="color:rgba(255,255,255,.7)"><span>Objectif +700 CHF (encaissé + facturé)</span><b id="gPct" style="color:var(--amber)">0%</b></div>
         <div class="bar" style="background:rgba(255,255,255,.15)"><i id="gFill" style="width:0%"></i></div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <h2 class="sec">Pipeline prospects — 26 juil. → 28 août</h2>
+      <svg width="90" height="120" viewBox="0 0 90 120" style="margin:6px 0">
+        <path d="M45 6 C 30 6 30 22 38 30 C 20 40 8 58 8 82 C 8 105 24 116 45 116 C 66 116 82 105 82 82 C 82 58 70 40 52 30 C 60 22 60 6 45 6 Z" fill="none" stroke="var(--line)" stroke-width="3"/>
+        <clipPath id="gourdClip"><path d="M45 6 C 30 6 30 22 38 30 C 20 40 8 58 8 82 C 8 105 24 116 45 116 C 66 116 82 105 82 82 C 82 58 70 40 52 30 C 60 22 60 6 45 6 Z"/></clipPath>
+        <rect id="gourdFill" x="8" y="116" width="74" height="0" fill="var(--amber)" clip-path="url(#gourdClip)"/>
+      </svg>
+      <div id="pqCount" style="font-size:22px;font-weight:800">0 / 25</div>
+      <div id="pqStars" style="font-size:22px;letter-spacing:2px;margin-top:2px">☆☆☆☆☆</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">1★ =5 · 2★ =10 · 3★ =15 · 4★ =20 · 5★ =25 prospects qualifiés</div>
+      <div style="display:flex;justify-content:space-around;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+        <div><div id="pAboCount" style="font-weight:800">0</div><div id="pAboStars" style="font-size:15px;color:var(--amber)">☆☆☆☆☆</div><small style="color:var(--muted)">Abonnés (÷10)</small></div>
+        <div><div id="pPromoCount" style="font-weight:800">0</div><div id="pPromoStars" style="font-size:15px;color:#8B5FBF">☆☆☆☆☆</div><small style="color:var(--muted)">Promoteurs (÷5)</small></div>
       </div>
     </div>
 
@@ -371,7 +391,7 @@
   <button class="on" onclick="tab('today',this)"><i>▶</i>Aujourd'hui</button>
   <button onclick="tab('pilot',this)"><i>◎</i>Pilotage</button>
   <button onclick="tab('forf',this)"><i>⧗</i>Forfaits</button>
-  <button onclick="tab('perso',this)"><i>♁</i>Perso</button>
+  <button onclick="tab('perso',this)"><i>♁</i>RH</button>
 </nav>
 <div class="toast" id="toast"></div>
 
@@ -379,6 +399,7 @@
 const KEY='dieyes-pilot-v1';
 const TYPES={pros:'Prospection',form:'Session',cash:'Cash',entr:'Entretien',prod:'Production'};
 const SPRINT_START='2026-07-08',SPRINT_END='2026-07-25',CASH_GOAL=700;
+const P2_START='2026-07-26',P2_END='2026-08-28';
 let S={sessions:[],clients:[],perso:[],active:null,pactive:null,coutH:30};
 let counters={},clockTimer=null;
 
@@ -397,7 +418,7 @@ async function load(){
   document.getElementById('coutH').value=S.coutH;
   initLock();
   if(!S.perso)S.perso=[];
-  renderAll();if(S.active)startClock();if(S.pactive)pStartClock();
+  renderAll();renderPerso();if(S.active)startClock();if(S.pactive)pStartClock();
 }
 function initLock(){
   if(!S.pin)document.getElementById('lockLbl').textContent='Première ouverture — créez votre clé (4 caractères minimum)';
@@ -431,6 +452,7 @@ function tab(v,btn){
   document.getElementById('v-'+v).classList.add('on');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');renderAll();
+  if(v==='perso')renderPerso();
 }
 
 /* ── Sessions ── */
@@ -480,7 +502,7 @@ function manualType(t){
 }
 function openClose(){
   counters={};
-  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
+  ['comptes','likes','comm','dm','rep','rdv','pprod','ppub','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits','prospectQ','promo'].forEach(k=>{counters[k]=0;const el=document.getElementById('s_'+k);if(el)el.textContent='0';});
   counters.energie=3;const eg=document.getElementById('s_energie');if(eg)eg.textContent='3';
   document.getElementById('startCard').classList.add('hidden');
   document.getElementById('liveCard').classList.add('hidden');
@@ -537,6 +559,7 @@ function saveClose(){
     sess.cash=parseFloat(document.getElementById('cCash').value)||0;
     sess.eng=parseFloat(document.getElementById('cFact').value)||0;
     sess.entretiens=counters.entrN||0;
+    sess.frais=parseFloat(document.getElementById('cFrais').value)||0;
   }
   if(manualMode&&a.type==='form'&&!document.getElementById('fDuree').value)sess.duree=dureeH;
   if(editIdx!==null){S.sessions[editIdx]=sess;editIdx=null;}else{S.sessions.unshift(sess);}
@@ -561,10 +584,10 @@ function setCout(v){S.coutH=parseFloat(v)||30;save();renderAll();}
 /* ── Rendu ── */
 function inSprint(d){const k=d.slice(0,10);return k>=SPRINT_START&&k<=SPRINT_END;}
 function agg(list){
-  const t={cash:0,eng:0,dm:0,comptes:0,rep:0,rdv:0,pprod:0,h:0,hA:0,hF:0,hInsta:0,hPilot:0,entretiens:0,outilsH:0};
+  const t={cash:0,eng:0,dm:0,comptes:0,rep:0,rdv:0,pprod:0,h:0,hA:0,hF:0,hInsta:0,hPilot:0,entretiens:0,outilsH:0,frais:0};
   list.forEach(s=>{
     t.cash+=s.cash||0;t.eng+=s.eng||0;t.dm+=s.dm||0;t.comptes+=s.comptes||0;
-    t.rep+=s.rep||0;t.rdv+=s.rdv||0;t.pprod+=s.pprod||0;t.h+=s.duree||0;t.entretiens+=s.entretiens||0;t.outilsH+=s.outilsH||0;
+    t.rep+=s.rep||0;t.rdv+=s.rdv||0;t.pprod+=s.pprod||0;t.h+=s.duree||0;t.entretiens+=s.entretiens||0;t.outilsH+=s.outilsH||0;t.frais+=s.frais||0;
     if(s.type==='pros')t.hA+=s.duree||0;
     if(s.type==='form'){const p=s.presta||'formation';if(p==='instagram')t.hInsta+=s.duree||0;else if(p==='pilotage')t.hPilot+=s.duree||0;else t.hF+=s.duree||0;}
   });return t;
@@ -598,12 +621,28 @@ function renderAll(){
   const verts=Object.values(days).filter(d=>d.dm>=5&&d.c>=10).length;
   document.getElementById('sprintKpis').innerHTML=
     kpi(Math.round(sp.cash)+' CHF','Encaissé','dark')+
-    kpi(Math.round(sp.eng)+' CHF','Facturé','dark')+
+    kpi(Math.round(sp.eng)+' CHF','Facturé','dark')+kpi(Math.round(sp.frais)+' CHF','Frais/charges','dark')+kpi(Math.round(sp.cash-sp.frais)+' CHF','Net encaissé','dark')+
     kpi(sp.dm,'DM total','dark')+kpi(sp.rdv,'RDV obtenus','dark')+
     kpi(verts,'Jours verts','dark')+kpi(sp.pprod,'Posts en stock','dark')+kpi(sp.entretiens,'Entretiens','dark')+kpi(Math.round(sp.hF*10)/10+' h','Formation','dark')+kpi(Math.round(sp.hInsta*10)/10+' h','Instagram (presta)','dark')+kpi(Math.round(sp.hPilot*10)/10+' h','Pilotage (presta)','dark')+kpi('<span class="'+(sp.outilsH>sp.hA?'neg':'')+'">'+Math.round(sp.outilsH*10)/10+' h</span>','Outils / stratégie','dark');
   const pct=Math.min(100,Math.round((sp.cash+sp.eng)/CASH_GOAL*100));
   document.getElementById('gPct').textContent=pct+'%';
   document.getElementById('gFill').style.width=pct+'%';
+  const p2=S.sessions.filter(s=>{const k=s.date.slice(0,10);return k>=P2_START&&k<=P2_END;});
+  const pqTotal=p2.reduce((a,s)=>a+(s.prospectQ||0),0);
+  const pqCapped=Math.min(25,pqTotal);
+  document.getElementById('pqCount').textContent=pqTotal+' / 25';
+  document.getElementById('gourdFill').setAttribute('height',(110*pqCapped/25));
+  document.getElementById('gourdFill').setAttribute('y',116-(110*pqCapped/25));
+  const stars=Math.min(5,Math.floor(pqTotal/5));
+  document.getElementById('pqStars').textContent='★'.repeat(stars)+'☆'.repeat(5-stars);
+  const aboTotal=p2.reduce((a,s)=>a+(s.nvAbo||0),0);
+  const aboStars=Math.min(5,Math.floor(aboTotal/10));
+  document.getElementById('pAboCount').textContent=aboTotal;
+  document.getElementById('pAboStars').textContent='★'.repeat(aboStars)+'☆'.repeat(5-aboStars);
+  const promoTotal=p2.reduce((a,s)=>a+(s.promo||0),0);
+  const promoStars=Math.min(5,Math.floor(promoTotal/5));
+  document.getElementById('pPromoCount').textContent=promoTotal;
+  document.getElementById('pPromoStars').textContent='★'.repeat(promoStars)+'☆'.repeat(5-promoStars);
   /* rentabilité */
   document.getElementById('hTot').value=Math.round(sp.h*10)/10+' h';
   const cout=Math.round(sp.h*S.coutH), marge=Math.round(sp.cash+sp.eng-cout);
@@ -640,7 +679,7 @@ function editSession(i){
   manualType(s.type);
   document.getElementById('mDate').value=s.date.slice(0,10);
   document.getElementById('mDuree').value=s.duree||1;
-  ['comptes','likes','comm','dm','rep','rdv','ppub','pprod','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits'].forEach(k=>{
+  ['comptes','likes','comm','dm','rep','rdv','ppub','pprod','idees','entrN','repart','repStory','nvAbo','dmDiff','repFaits','prospectQ','promo'].forEach(k=>{
     counters[k]=s[k]||0;const el=document.getElementById('s_'+k);if(el)el.textContent=counters[k];
   });
   if(s.type==='form'){
@@ -652,6 +691,7 @@ function editSession(i){
   }
   if(s.type==='cash'){
     document.getElementById('cQui').value=s.qui||'';
+    document.getElementById('cFrais').value=s.frais||'';
     document.getElementById('cCash').value=s.cash||'';
     document.getElementById('cFact').value=s.eng||'';
     counters.entrN=s.entretiens||0;document.getElementById('s_entrN').textContent=counters.entrN;
@@ -666,6 +706,14 @@ function editSession(i){
     document.getElementById('eEng').value=s.eng||'';
   }
 }
+function fmtDuree(h){
+  if(!h)return '0min';
+  const totalMin=Math.round(h*60);
+  const hh=Math.floor(totalMin/60),mm=totalMin%60;
+  if(hh===0)return mm+'min';
+  if(mm===0)return hh+'h';
+  return hh+'h'+String(mm).padStart(2,'0');
+}
 function histHTML(list,delBtn){
   if(!list.length)return '<li><small style="color:var(--muted)">Rien encore — lance ta première session.</small></li>';
   return list.map(s=>{
@@ -674,12 +722,12 @@ function histHTML(list,delBtn){
     const when=d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
     let main='',val='';
     if(s.type==='pros'){const pn={sofia:'Sofia',claire:'Claire',pg:'PG',autre:'Autre'}[s.persona]||'';main=(pn?'['+pn+'] ':'')+(s.dm||0)+' DM · '+(s.comptes||0)+' comptes'+(s.repFaits?' · '+s.repFaits+' repart.':'')+((s.repart||s.nvAbo)?' · reçu: '+(s.repart||0)+'/'+(s.nvAbo||0)+' abo.':'');val=(s.rdv||0)+' RDV';}
-    if(s.type==='form'){main=(s.client||'Client')+(s.presta&&s.presta!=='formation'?' · '+s.presta:'');val=(s.cash?Math.round(s.cash)+' CHF · ':'')+(s.duree||0)+'h';}
+    if(s.type==='form'){main=(s.client||'Client')+(s.presta&&s.presta!=='formation'?' · '+s.presta:'');val=(s.cash?Math.round(s.cash)+' CHF · ':'')+fmtDuree(s.duree);}
     if(s.type==='entr'){main=(s.qui||'')+' — '+(s.res||'');val=(s.cash||s.eng)?Math.round((s.cash||0)+(s.eng||0))+' CHF':'';}
-    if(s.type==='cash'){main=(s.qui||'Cash')+' · '+(s.entretiens||0)+' entretien(s)';val=Math.round(s.cash||0)+' / '+Math.round(s.eng||0)+' CHF';}
+    if(s.type==='cash'){main=(s.qui||'Cash')+(s.frais?' · frais '+Math.round(s.frais)+' CHF':'')+' · '+(s.entretiens||0)+' entretien(s)';val=Math.round(s.cash||0)+' / '+Math.round(s.eng||0)+' CHF';}
     if(s.type==='prod'){main=(s.pprod||0)+' produits · '+(s.ppub||0)+' publiés';val=(s.idees||0)+' idées';}
     const del=delBtn?'<button onclick="editSession('+idx+')" style="border:none;background:none;color:var(--teal);font-size:14px;cursor:pointer;padding:4px">✎</button><button onclick="delSession('+idx+')" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px">✕</button>':'';
-    return '<li><span class="tag '+s.type+'">'+TYPES[s.type].slice(0,5)+'</span><div class="hmain"><b>'+main+'</b><small>'+when+' · '+(s.duree||0)+'h</small></div><div class="hval">'+val+'</div>'+del+'</li>';
+    return '<li><span class="tag '+s.type+'">'+TYPES[s.type].slice(0,5)+'</span><div class="hmain"><b>'+main+'</b><small>'+when+' · '+fmtDuree(s.duree)+'</small></div><div class="hval">'+val+'</div>'+del+'</li>';
   }).join('');
 }
 
