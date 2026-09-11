@@ -365,6 +365,11 @@
       <h2 class="sec">Dernières entrées</h2>
       <div id="corpsHistToday"></div>
     </div>
+
+    <div class="card">
+      <h2 class="sec">Projets — pilier Terre</h2>
+      <div class="kpis" id="corpsJourProjKpis"></div>
+    </div>
   </div>
 
   <div class="view" id="v-corps-semaine">
@@ -864,7 +869,8 @@ function renderAll(){
     kpi(fmtDuree(t.h),'Temps Feu aujourd\u2019hui',t.h>=1?'dark':'')+
     kpi(t.n,'Sessions Feu',t.n>=1?'dark':'')+
     kpi(Math.round(t.cash)+' CHF','Encaissé')+
-    kpi(vert?'✓ VERT':'Orange','Journée '+(vert?'active':'en cours'));
+    kpi(vert?'✓ VERT':'Orange','Journée '+(vert?'active':'en cours'))+
+    projKpisHTML(S.sessions,'feu',false);
   document.getElementById('histToday').innerHTML=histHTML(tl.slice(0,8),true);
 
   const[wStart,wEnd]=monBounds(new Date());
@@ -875,6 +881,7 @@ function renderAll(){
     kpi(w.n,'Sessions','dark')+
     kpi(Math.round(w.cash)+' CHF','Cash encaissé','dark')+
     kpi(w.retards,'Retards paiement','dark')+
+    projKpisHTML(S.sessions,'feu',false)+
     repartitionHTML(w,7);
 
   const now=new Date();
@@ -887,6 +894,7 @@ function renderAll(){
     kpi(Math.round(mo.cash)+' CHF','Cash encaissé','dark')+
     kpi((S.structPct||0)+'%','Structure suisse','dark')+
     kpi(mo.retards,'Retards paiement','dark')+
+    projKpisHTML(S.sessions,'feu',true)+
     repartitionHTML(mo,daysInMonth);
 
   document.getElementById('hTot').value=Math.round(mo.h*10)/10+' h';
@@ -1052,6 +1060,7 @@ function renderCorps(){
   const todayK=new Date().toISOString().slice(0,10);
   const todayList=S.corps.filter(e=>e.date===todayK);
   document.getElementById('corpsHistToday').innerHTML='<ul class="hist">'+(todayList.length?todayList.map((e)=>corpsHistItem(e,S.corps.indexOf(e),true)).join(''):'<li><small style="color:var(--muted)">Rien encore pour aujourd’hui.</small></li>')+'</ul>';
+  document.getElementById('corpsJourProjKpis').innerHTML=projKpisHTML(S.sessions,'terre',false);
 
   const[wStart,wEnd]=monBounds(new Date());
   const wl=S.corps.filter(e=>{const d=new Date(e.date+'T12:00');return d>=wStart&&d<=wEnd;});
@@ -1065,7 +1074,8 @@ function renderCorps(){
     kpi(w.n?Math.round(w.detenteTot/w.n/(16*60)*1000)/10+'%':'0%','Détente / 16h','dark')+
     kpi(Math.round(w.repasMoy*10)/10+'/5','Qualité repas','dark')+
     kpi(Math.round(w.energieMoy*10)/10+'/5','Énergie moyenne','dark')+
-    kpi(Math.round(w.menageMoy*10)/10+'/5','Ménage','dark');
+    kpi(Math.round(w.menageMoy*10)/10+'/5','Ménage','dark')+
+    projKpisHTML(S.sessions,'terre',false);
 
   const now=new Date();
   const ml=S.corps.filter(e=>{const d=new Date(e.date+'T12:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
@@ -1080,7 +1090,8 @@ function renderCorps(){
     kpi(mo.n?Math.round(mo.detenteTot/mo.n/(16*60)*1000)/10+'%':'0%','Détente / 16h','dark')+
     kpi(Math.round(mo.energieMoy*10)/10+'/5','Énergie moyenne','dark')+
     kpi(Math.round(mo.bienEtreMoy*10)/10+'/5','Bien-être intime','dark')+
-    kpi(mo.n,'Jours renseignés','dark');
+    kpi(mo.n,'Jours renseignés','dark')+
+    projKpisHTML(S.sessions,'terre',true);
   document.getElementById('corpsHistAll').innerHTML='<ul class="hist">'+(S.corps.length?S.corps.map((e)=>corpsHistItem(e,S.corps.indexOf(e),true)).join(''):'<li><small style="color:var(--muted)">Aucune entrée.</small></li>')+'</ul>';
 }
 
@@ -1123,7 +1134,8 @@ function renderFinances(){
     kpi(fmtDuree(eauToday.reduce((a,s)=>a+(s.duree||0),0)),'Temps Eau aujourd\u2019hui')+
     kpi(Math.round(fJ.cash)+' CHF','Encaissé')+
     kpi(Math.round(fJ.dep)+' CHF','Dépenses')+
-    kpi(fJ.retards,'Retards');
+    kpi(fJ.retards,'Retards')+
+    projKpisHTML(S.sessions,'eau',false);
   document.getElementById('finHistToday').innerHTML='<ul class="hist">'+(fJ.n?tl.filter(s=>s.pilier==='eau').map(finHistItem).join(''):'<li><small style="color:var(--muted)">Aucun flux aujourd\u2019hui.</small></li>')+'</ul>';
 
   const rcJ=rcAgg(tl);
@@ -1148,7 +1160,8 @@ function renderFinances(){
     kpi(fW.retards,'Retards de paiement','dark')+
     kpi(Math.round(fW.cash-fW.dep)+' CHF','Net semaine','dark')+
     kpi(Math.round(rcW.investi)+' / '+Math.round(rcW.revenus)+' CHF','Investi / généré (projets)','dark')+
-    kpi(rcW.roas!==null?rcW.roas+'x':'—','ROAS projets','dark');
+    kpi(rcW.roas!==null?rcW.roas+'x':'—','ROAS projets','dark')+
+    projKpisHTML(S.sessions,'eau',false);
 
   const now=new Date();
   const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
@@ -1165,7 +1178,8 @@ function renderFinances(){
     kpi(fM.retards,'Retards de paiement','dark')+
     kpi(Math.round(rcM.investi)+' CHF','Investi projets (mois)','dark')+
     kpi(Math.round(rcM.revenus)+' CHF','Généré projets (mois)','dark')+
-    kpi(rcM.roas!==null?rcM.roas+'x':'—','ROAS mensuel projets','dark');
+    kpi(rcM.roas!==null?rcM.roas+'x':'—','ROAS mensuel projets','dark')+
+    projKpisHTML(S.sessions,'eau',true);
 }
 
 /* ══════════ PILIER RELATIONS (lecture du tag "partagé", tous blocs confondus) ══════════ */
@@ -1217,7 +1231,8 @@ function renderRelations(){
     kpi(rJ.invitations,'Invitations (moi)')+
     kpi(fmtDuree(rJ.h),'Temps partagé')+
     kpi(dToday.tendues,'Discussions tendues')+
-    kpi(dToday.enrichissantes,'Discussions enrichissantes');
+    kpi(dToday.enrichissantes,'Discussions enrichissantes')+
+    projKpisHTML(S.sessions,'vent',false);
   const todayShared=relFilter(tl).filter(s=>s.soloPartage==='partage');
   document.getElementById('relHistToday').innerHTML='<ul class="hist">'+(todayShared.length?todayShared.map(relHistItem).join(''):'<li><small style="color:var(--muted)">Rien de partagé aujourd\u2019hui.</small></li>')+'</ul>';
 
@@ -1232,7 +1247,8 @@ function renderRelations(){
     kpi(rW.invitations,'Invitations (moi)','dark')+
     kpi(fmtDuree(rW.h),'Temps partagé','dark')+
     kpi(dW.tendues,'Discussions tendues (semaine)','dark')+
-    kpi(dW.enrichissantes,'Discussions enrichissantes (semaine)','dark');
+    kpi(dW.enrichissantes,'Discussions enrichissantes (semaine)','dark')+
+    projKpisHTML(S.sessions,'vent',false);
 
   const now=new Date();
   const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
@@ -1247,7 +1263,8 @@ function renderRelations(){
     kpi(rM.invitations,'Invitations (moi)','dark')+
     kpi(fmtDuree(rM.h),'Temps partagé cumulé','dark')+
     kpi(dM.tendues,'Discussions tendues (mois)','dark')+
-    kpi(dM.enrichissantes,'Discussions enrichissantes (mois)','dark');
+    kpi(dM.enrichissantes,'Discussions enrichissantes (mois)','dark')+
+    projKpisHTML(S.sessions,'vent',true);
 }
 
 /* ══════════ PILIER VIDE / DÉVELOPPEMENT ══════════ */
@@ -1265,15 +1282,28 @@ function connexBump(delta){
 function connexSum(dateFrom,dateTo){
   return S.connexions.filter(c=>c.date>=dateFrom&&c.date<=dateTo).reduce((a,c)=>a+(c.n||0),0);
 }
-function videProjets(list){
-  const eclaireVide=list.filter(s=>s.type==='eclaire'&&s.pilier==='vide'&&s.titre&&s.titre.trim());
+function projetsForPillar(list,pillarKey){
+  const filtered=list.filter(s=>s.pilier===pillarKey&&s.titre&&s.titre.trim());
   const byTitre={};
-  eclaireVide.forEach(s=>{
+  filtered.forEach(s=>{
     const k=s.titre.trim().toLowerCase();
     if(!byTitre[k]||s.stade>byTitre[k].stade)byTitre[k]={titre:s.titre.trim(),stade:s.stade};
   });
   return Object.values(byTitre);
 }
+function projKpisHTML(list,pillarKey,monthly){
+  const projets=projetsForPillar(list,pillarKey);
+  const testOuPlus=projets.filter(p=>p.stade>=3).length;
+  const ratio=projets.length?Math.round(testOuPlus/projets.length*100)+'%':'\u2014';
+  let html=kpi(projets.length,'Projets en cours','dark')+
+    kpi(ratio,'\u2265 test / total','dark');
+  if(monthly){
+    const clos=projets.filter(p=>p.stade===4).length;
+    html+=kpi(clos,'Projets clos','dark');
+  }
+  return html;
+}
+function videProjets(list){return projetsForPillar(list,'vide');}
 function renderVide(){
   const todayK=new Date().toISOString().slice(0,10);
   const tl=S.sessions.filter(s=>s.date.slice(0,10)===todayK);
@@ -1283,7 +1313,8 @@ function renderVide(){
   document.getElementById('videJourKpis').innerHTML=
     kpi(vJ.n,'Connexions aujourd\u2019hui')+
     kpi(eclaireToday.length,'Sessions J\u2019éclaire')+
-    kpi(fmtDuree(eclaireToday.reduce((a,s)=>a+(s.duree||0),0)),'Temps du jour');
+    kpi(fmtDuree(eclaireToday.reduce((a,s)=>a+(s.duree||0),0)),'Temps du jour')+
+    projKpisHTML(S.sessions,'vide',false);
   document.getElementById('videHistToday').innerHTML='<ul class="hist">'+(eclaireToday.length?eclaireToday.map(s=>{
     const idx=S.sessions.indexOf(s);
     return '<li><div class="hmain"><b>'+(s.titre||s.categorie)+'</b><small>'+s.categorie+' · '+fmtDuree(s.duree)+'</small></div><button class="ic" onclick="editSession('+idx+')" style="color:var(--teal)">✎</button></li>';
