@@ -102,6 +102,47 @@
   nav button i{display:block;font-style:normal;font-size:16px;margin-bottom:2px}
   .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--ink-bg);color:#fff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:99px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:50}
   .toast.show{opacity:1}
+  /* Domaines (sessions simplifiées) */
+  .dchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .dchip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:9px 14px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+  .dchip.on{color:#fff;border-color:transparent}
+  .dchip.add{border-style:dashed;color:var(--muted);background:transparent}
+  .dchip .x{margin-left:6px;color:var(--orange)}
+  .tbtn.sel{outline:3px solid var(--ink-bg);outline-offset:2px}
+  .pernav{display:flex;align-items:center;gap:8px;margin-top:14px;background:var(--card);border-radius:14px;padding:6px;box-shadow:0 2px 10px rgba(15,46,46,.07)}
+  .pernav button{border:none;background:var(--paper);border-radius:10px;width:40px;height:40px;font-size:20px;font-weight:800;color:var(--ink);cursor:pointer;flex-shrink:0}
+  .pernav button:disabled{opacity:.3;cursor:default}
+  .pernav .lab{flex:1;text-align:center;font-size:13px;font-weight:800}
+  .pernav .lab small{display:block;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline}
+  .mchips{display:flex;gap:6px;margin-bottom:10px}
+  .mchips button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;font-family:inherit;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer}
+  .mchips button.on{background:var(--ink-bg);color:#fff;border-color:transparent}
+  .qtab{width:100%;border-collapse:collapse;font-size:12px}
+  .qtab th,.qtab td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  .qtab th:first-child,.qtab td:first-child{text-align:left;white-space:normal}
+  .qtab th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .qtab tr.sep td{border-bottom:2px solid var(--ink-bg);padding:2px}
+  .qtab td.tot{font-weight:800}
+  .jal{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .jal:last-child{border-bottom:none}
+  .jal .st{flex-shrink:0;font-size:10px;font-weight:800;padding:4px 8px;border-radius:7px;color:#fff;margin-top:1px;min-width:62px;text-align:center}
+  .jal b{display:block;font-size:13px}.jal small{color:rgba(255,255,255,.65);font-size:11px}
+  .auto{font-size:9px;font-weight:800;color:var(--teal);margin-left:3px}
+  .dests{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
+  .dbtn{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 2px 8px;font-family:inherit;font-size:11px;font-weight:800;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;line-height:1.15}
+  .dbtn i{width:12px;height:12px;border-radius:50%;display:block}
+  .dbtn.on{color:#fff;border-color:transparent}
+  details.more{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+  details.more summary{font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;list-style:none}
+  details.more summary::-webkit-details-marker{display:none}
+  details.more summary::before{content:'＋ '}
+  details.more[open] summary::before{content:'－ '}
+  .tbar{margin:8px 0}.tbar .l{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+  .tbar .l em{font-style:normal;color:var(--muted)}
+  .tbar .tr{height:9px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:4px}
+  .tbar .fi{height:100%;border-radius:99px}
+  .tsub{margin:2px 0 10px 10px;padding-left:10px;border-left:2px solid var(--line)}
+  .tsub .tbar .l{font-weight:600}.tsub .tbar .tr{height:6px}
   .hidden{display:none!important}
 </style>
 </head>
@@ -124,6 +165,7 @@
 </div>
 
 <div class="wrap">
+    <div class="pernav hidden" id="perNav"><button id="perPrev" onclick="perMove(-1)" aria-label="Période précédente">‹</button><div class="lab" id="perLab"></div><button id="perNext" onclick="perMove(1)" aria-label="Période suivante">›</button></div>
 
     <div class="card live hidden" id="liveCard">
       <div class="type" id="liveType"></div>
@@ -134,11 +176,16 @@
     <div class="card" id="startCard">
       <h2 class="sec">Lancer une session</h2>
       <div class="types">
-        <button class="tbtn" style="background:var(--corps)" onclick="startSession('pratique')"><b>Je pratique</b><small>Terre</small></button>
-        <button class="tbtn" style="background:var(--spirituel)" onclick="startSession('eclaire')"><b>J'éclaire</b><small>Vide</small></button>
-        <button class="tbtn" style="background:var(--finances)" onclick="startSession('gere')"><b>Je gère</b><small>Eau</small></button>
-        <button class="tbtn" style="background:var(--business);color:var(--ink-bg)" onclick="startSession('produis')"><b>Je produis</b><small>Feu</small></button>
-        <button class="tbtn" style="background:var(--relationnel);grid-column:1/-1" onclick="startSession('connecte')"><b>Je connecte</b><small>Vent</small></button>
+        <button class="tbtn" style="background:var(--corps)" data-t="pratique" onclick="pickType('pratique')"><b>Je pratique</b><small>Terre</small></button>
+        <button class="tbtn" style="background:var(--spirituel)" data-t="eclaire" onclick="pickType('eclaire')"><b>J'éclaire</b><small>Vide</small></button>
+        <button class="tbtn" style="background:var(--finances)" data-t="gere" onclick="pickType('gere')"><b>Je gère</b><small>Eau</small></button>
+        <button class="tbtn" style="background:var(--business);color:var(--ink-bg)" data-t="produis" onclick="pickType('produis')"><b>Je produis</b><small>Feu</small></button>
+        <button class="tbtn" style="background:var(--relationnel);grid-column:1/-1" data-t="connecte" onclick="pickType('connecte')"><b>Je connecte</b><small>Vent</small></button>
+      </div>
+      <div id="pickBox" class="hidden">
+        <label class="f" id="pickLbl">Pour quoi ?</label>
+        <div class="dests" id="pickChips"></div>
+        <button class="btn main" id="pickGo" style="margin-top:12px" onclick="goSession()">Démarrer</button>
       </div>
       <button class="btn ghost" onclick="openManual()">＋ Saisir une session manuellement</button>
     </div>
@@ -157,20 +204,23 @@
         </select>
         <div class="grid2">
           <div><label class="f">Date</label><input class="f" type="date" id="mDate"></div>
-          <div><label class="f">Durée (h)</label><input class="f" type="number" step="0.25" id="mDuree" placeholder="1"></div>
+          <div><label class="f">Durée (minutes)</label><input class="f" type="number" step="1" min="1" inputmode="numeric" id="mDuree" placeholder="60"></div>
         </div>
       </div>
 
+      <label class="f" id="closeDomLbl">Pour quoi ?</label>
+      <div class="dests" id="closeChips"></div>
+
       <!-- Formulaire unique, contenu généré dynamiquement selon le bloc -->
       <div id="cf-generic">
+        <details class="more" id="moreBox"><summary>Plus de détails (facultatif) : stade, titre, investi, dépensé, client, partagé</summary>
         <label class="f" style="margin-top:0">Catégorie (stade)</label>
         <select class="f" id="genCat"></select>
 
         <label class="f">Titre — qu'est-ce que c'est ?</label>
         <input class="f" type="text" id="genTitre" placeholder="Ex : voyage 2027, ménage, prospection">
 
-        <label class="f">Pilier de destination</label>
-        <select class="f" id="genPilier">
+        <select class="f hidden" id="genPilier">
           <option value="terre">Terre</option>
           <option value="vide">Vide</option>
           <option value="eau">Eau</option>
@@ -183,9 +233,6 @@
           <div><input class="f" type="number" id="genInvesti" placeholder="0"></div>
           <div><label class="f" style="margin-top:0;font-size:11px">Dépensé (CHF)</label><input class="f" type="number" id="genDepense" placeholder="0"></div>
         </div>
-        <label class="f">Revenu généré (CHF)</label>
-        <input class="f" type="number" id="genRevenu" placeholder="0">
-        <small style="color:var(--muted)">Résultat pas encore connu ? Laisse à 0 et reviens éditer plus tard.</small>
 
         <label class="f" style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" id="genIsClient" onchange="genClientToggle()" style="width:18px;height:18px"> Concerne une cliente / un client (forfait)
@@ -216,8 +263,14 @@
           </label>
         </div>
 
-        <label class="f">Note libre</label>
-        <textarea class="f" id="genNote" rows="2" placeholder="Détail de la session"></textarea>
+        </details>
+        <div class="grid2">
+          <div><label class="f">Facturé (CHF)</label><input class="f" type="number" inputmode="decimal" id="genFacture" placeholder="0"></div>
+          <div><label class="f">Encaissé (CHF)</label><input class="f" type="number" inputmode="decimal" id="genRevenu" placeholder="0"></div>
+        </div>
+        <small style="color:var(--muted)">Facultatif. Facture envoyée → « Facturé ». Paiement reçu → « Encaissé » (idéalement dans une session Je gère). Les deux s'additionnent dans Semaine, Mois et Q4.</small>
+        <label class="f">Note (facultatif)</label>
+        <textarea class="f" id="genNote" rows="2" placeholder="Ce que j'ai fait"></textarea>
       </div>
 
       <div style="margin-top:16px">
@@ -243,8 +296,12 @@
   <!-- ═══ SEMAINE ═══ -->
   <div class="view" id="v-business-semaine">
     <div class="card" style="background:var(--ink-bg);color:#fff">
-      <h2 class="sec" style="color:var(--business)">Semaine en cours</h2>
+      <h2 class="sec" style="color:var(--business)" id="wkTitle">Semaine en cours</h2>
       <div class="kpis" id="weekKpis"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Temps de la semaine</h2>
+      <div id="weekTemps"></div>
     </div>
     <div class="card">
       <h2 class="sec">Avancement structure suisse</h2>
@@ -260,6 +317,10 @@
       <div class="kpis" id="monthKpis"></div>
     </div>
     <div class="card">
+      <h2 class="sec">Temps du mois</h2>
+      <div id="monthTemps"></div>
+    </div>
+    <div class="card">
       <h2 class="sec">Rentabilité théorique</h2>
       <div class="grid2" style="margin-bottom:10px">
         <div><label class="f" style="margin-top:0">Coût horaire (CHF)</label><input class="f" type="number" id="coutH" value="30" onchange="setCout(this.value)"></div>
@@ -270,6 +331,29 @@
     <div class="card">
       <h2 class="sec">Historique complet</h2>
       <ul class="hist" id="histAll"></ul>
+    </div>
+  </div>
+
+  <!-- ═══ Q4 : OBJECTIFS & RÉCAP DU TRIMESTRE ═══ -->
+  <div class="view" id="v-business-q4">
+    <div class="card" style="background:var(--ink-bg);color:#fff">
+      <h2 class="sec" style="color:var(--business)">Objectifs Q4 · 1er oct. – 31 déc.</h2>
+      <div id="q4Jalons"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Tableau du trimestre</h2>
+      <div style="overflow-x:auto"><table class="qtab" id="q4Table"></table></div>
+      <small style="color:var(--muted);display:block;margin-top:8px">Facturé, encaissé et dépenses = total de tes sessions, rien à saisir. Le ratio mensuel peut dépasser 100 % quand une facture d'un mois est payée le suivant : lis surtout le total du trimestre. Taux horaire réel = encaissé ÷ heures à destination du Business. Palier = encaissé du mois sur ton échelle (200 · 500 · 1000 · 2100 · 3500).</small>
+    </div>
+    <div class="card">
+      <h2 class="sec">Chiffres de prospection du mois</h2>
+      <div class="mchips" id="q4Months"></div>
+      <div id="q4Form"></div>
+      <small style="color:var(--muted);display:block;margin-top:8px" id="q4AutoNote"></small>
+    </div>
+    <div class="card">
+      <h2 class="sec">Temps du trimestre</h2>
+      <div id="q4Temps"></div>
     </div>
   </div>
 
@@ -588,7 +672,7 @@ async function resetPin(){
 
 /* ── Navigation ── */
 const PILLARS={
-  business:{label:'Business',color:'var(--business)',views:[{k:'jour',label:'Jour',icon:'▶'},{k:'semaine',label:'Semaine',icon:'▤'},{k:'mois',label:'Mois',icon:'◎'},{k:'prospects',label:'Prospects',icon:'☰'},{k:'forfaits',label:'Forfaits',icon:'⧗'}]},
+  business:{label:'Business',color:'var(--business)',views:[{k:'jour',label:'Jour',icon:'▶'},{k:'semaine',label:'Semaine',icon:'▤'},{k:'mois',label:'Mois',icon:'◎'},{k:'q4',label:'Q4',icon:'◆'},{k:'prospects',label:'Prospects',icon:'☰'},{k:'forfaits',label:'Forfaits',icon:'⧗'}]},
   corps:{label:'Individu',color:'var(--corps)',views:[{k:'jour',label:'Jour',icon:'▶'},{k:'semaine',label:'Semaine',icon:'▤'},{k:'mois',label:'Mois',icon:'◎'}]},
   finances:{label:'Flux&Orga',color:'var(--finances)',views:[{k:'jour',label:'Jour',icon:'▶'},{k:'semaine',label:'Semaine',icon:'▤'},{k:'mois',label:'Mois',icon:'◎'}]},
   relations:{label:'Relations',color:'var(--relationnel)',views:[{k:'jour',label:'Jour',icon:'▶'},{k:'semaine',label:'Semaine',icon:'▤'},{k:'mois',label:'Mois',icon:'◎'}]},
@@ -620,13 +704,135 @@ function pTab(v){
   currentView=v;showView();renderNav();renderAll();
 }
 function showView(){
+  setTimeout(renderPerNav,0);
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
   const el=document.getElementById('v-'+currentPillar+'-'+currentView);
   if(el)el.classList.add('on');
 }
 
+/* ── Sessions simplifiées : action (nature) → destination (ce que ce temps sert) → chrono ── */
+const PIL_COLOR={terre:'var(--corps)',vide:'var(--spirituel)',eau:'var(--finances)',feu:'var(--business)',vent:'var(--relationnel)'};
+const VERBE={pratique:'Je pratique',eclaire:"J'éclaire",gere:'Je gère',produis:'Je produis',connecte:'Je connecte'};
+const DEST_ORDRE=['terre','eau','feu','vent','vide'];
+const DEST_LABEL={terre:'Individu',eau:'Flux & Orga',feu:'Business',vent:'Relations',vide:'Développement'};
+let pickT=null,pickD=null;
+const homeP=t=>BLOCK_HOME_PILLAR[t]||'terre';
+const escH=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function destHTML(cur,fn){
+  return DEST_ORDRE.map(p=>{const on=p===cur,c=PIL_COLOR[p];
+    return '<button class="dbtn'+(on?' on':'')+'" style="'+(on?'background:'+c:'')+'" onclick="'+fn+'(\''+p+'\')"><i style="background:'+(on?'#fff':c)+'"></i>'+DEST_LABEL[p]+'</button>';}).join('');
+}
+function pickType(t){
+  if(S.active){toast('Une session est déjà en cours');return;}
+  if(pickT===t){pickT=null;}else{pickT=t;pickD=homeP(t);}
+  renderPick();
+}
+function renderPick(){
+  document.querySelectorAll('#startCard .tbtn').forEach(b=>b.classList.toggle('sel',b.dataset.t===pickT));
+  document.getElementById('pickBox').classList.toggle('hidden',!pickT);
+  if(!pickT)return;
+  document.getElementById('pickLbl').textContent=VERBE[pickT]+' — pour quoi ?';
+  document.getElementById('pickChips').innerHTML=destHTML(pickD,'pickDest');
+  document.getElementById('pickGo').textContent='Démarrer · '+VERBE[pickT]+' → '+DEST_LABEL[pickD];
+}
+function pickDest(p){pickD=p;renderPick();}
+function goSession(){if(!pickT)return;const t=pickT,d=pickD||homeP(pickT);pickT=null;pickD=null;renderPick();startSession(t,d);}
+function renderCloseChips(){
+  if(!S.active)return;
+  if(!S.active.dest)S.active.dest=homeP(S.active.type);
+  document.getElementById('closeDomLbl').textContent=VERBE[S.active.type]+' — pour quoi ?';
+  document.getElementById('closeChips').innerHTML=destHTML(S.active.dest,'closeDest');
+  document.getElementById('genPilier').value=S.active.dest;
+}
+function closeDest(p){S.active.dest=p;renderCloseChips();}
+
+/* Récap du temps : par action, par destination, et croisements */
+function tempsHTML(list){
+  if(!list.length)return '<small style="color:var(--muted)">Aucune session sur cette période.</small>';
+  const byT={},byP={},byX={};let tot=0;
+  list.forEach(s=>{const h=s.duree||0;tot+=h;
+    const t=VERBE[s.type]?s.type:'autre';byT[t]=(byT[t]||0)+h;
+    const p=s.pilier||homeP(s.type);byP[p]=(byP[p]||0)+h;
+    if(t!=='autre'&&p!==homeP(t)){const k=t+'>'+p;byX[k]=(byX[k]||0)+h;}});
+  const bar=(lab,h,ref,c)=>'<div class="tbar"><div class="l"><span>'+escH(lab)+'</span><em>'+fmtDuree(h)+' · '+Math.round(h/(tot||1)*100)+'%</em></div><div class="tr"><div class="fi" style="width:'+(h/ref*100)+'%;background:'+c+'"></div></div></div>';
+  const sec=t=>'<div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px">'+t+'</div>';
+  const mT=Math.max(...Object.values(byT),0.01),mP=Math.max(...Object.values(byP),0.01);
+  const xs=Object.entries(byX).sort((a,b)=>b[1]-a[1]);const mX=Math.max(...xs.map(x=>x[1]),0.01);
+  return '<div style="display:flex;justify-content:space-between;font-weight:800"><span>Total mesuré</span><span>'+fmtDuree(tot)+'</span></div>'+
+    sec('Par action (nature)')+Object.keys(byT).sort((a,b)=>byT[b]-byT[a]).map(t=>bar(VERBE[t]||'Ancien format',byT[t],mT,PIL_COLOR[homeP(t)]||'var(--muted)')).join('')+
+    sec('Par destination (ce que ce temps sert)')+Object.keys(byP).sort((a,b)=>byP[b]-byP[a]).map(p=>bar(DEST_LABEL[p]||p,byP[p],mP,PIL_COLOR[p]||'var(--muted)')).join('')+
+    (xs.length?sec('Croisements (action → autre destination)')+xs.map(([k,h])=>{const[t,p]=k.split('>');return bar(VERBE[t]+' → '+DEST_LABEL[p],h,mX,PIL_COLOR[p]);}).join(''):'');
+}
+function renderTemps(){
+  const[ws,we]=wkRange();
+  const inR=(s,a,b)=>{const d=new Date(s.date);return d>=a&&d<=b;};
+  document.getElementById('weekTemps').innerHTML=tempsHTML(S.sessions.filter(s=>inR(s,ws,we)));
+  document.getElementById('monthTemps').innerHTML=tempsHTML(S.sessions.filter(s=>inRefMonth(new Date(s.date))));
+  document.getElementById('q4Temps').innerHTML=tempsHTML(S.sessions.filter(s=>s.date>='2026-10-01'&&s.date<'2027-01-01'));
+  renderQ4();
+}
+
+/* ══════════ Q4 : objectifs, chiffres du mois, rentabilité ══════════ */
+const Q4_MOIS=[['2026-10','Oct.'],['2026-11','Nov.'],['2026-12','Déc.']];
+const PALIERS=[200,500,1000,2100,3500];
+const CHAMPS=[['comptes','Comptes touchés'],['visites','Visites de profil'],['conversations','Conversations ouvertes'],['entretiens','Entretiens (CAP)'],['ventesComeUp','Ventes ComeUp']];
+let q4Mois=null,AUTO={};
+function curQ4Mois(){if(q4Mois)return q4Mois;const k=new Date().toISOString().slice(0,7);return Q4_MOIS.some(m=>m[0]===k)?k:'2026-10';}
+function encMois(m){const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.cash||0),0):null;}
+function facMois(m){const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.facture||0),0):null;}
+function depMois(m){const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.depense||0)+(s.investi||0),0):null;}
+function chiffre(m,c){
+  if(c==='encaisse')return{v:encMois(m),auto:false};const own=S.chiffres&&S.chiffres[m]&&S.chiffres[m][c];if(own!==undefined&&own!==null&&own!=='')return{v:Number(own),auto:false};
+  const a=AUTO.mois&&AUTO.mois[m]&&AUTO.mois[m][c];return a!==undefined&&a!==null?{v:Number(a),auto:true}:{v:null,auto:false};}
+function setChiffre(m,c,v){if(!S.chiffres)S.chiffres={};if(!S.chiffres[m])S.chiffres[m]={};
+  if(v===''){delete S.chiffres[m][c];}else S.chiffres[m][c]=Number(String(v).replace(',','.'));save('Enregistré ✓');renderQ4();}
+function palierDe(v){let n=0;PALIERS.forEach((p,i)=>{if(v>=p)n=i+1;});return n;}
+function heuresMois(m,dest){return S.sessions.filter(s=>s.date.slice(0,7)===m&&(!dest||s.pilier===dest)).reduce((a,s)=>a+(s.duree||0),0);}
+function renderQ4(){
+  if(!document.getElementById('q4Table'))return;
+  const val=(m,c)=>chiffre(m,c).v;const n=x=>x===null||x===undefined||isNaN(x)?'—':Math.round(x).toLocaleString('fr-CH');
+  const sum=c=>{const xs=Q4_MOIS.map(([m])=>val(m,c)).filter(x=>x!==null);return xs.length?xs.reduce((a,b)=>a+b,0):null;};
+  const today=new Date().toISOString().slice(0,10);
+  const st=(ok,pending,vide)=>ok?['Atteint','var(--green)']:vide?['À saisir','#5E7876']:pending?['En cours','#5E7876']:['Manqué','var(--orange)'];
+  const ent=val('2026-10','entretiens'),vcu=val('2026-10','ventesComeUp'),encN=val('2026-11','encaisse'),encD=val('2026-12','encaisse');
+  const J=[
+    ['30 oct.','10 entretiens (CAP) en octobre',ent===null?'non saisi':n(ent)+' / 10',st(ent!==null&&ent>=10,today<='2026-10-30',ent===null)],
+    ['30 oct.','5 ventes ComeUp',vcu===null?'non saisi':n(vcu)+' / 5',st(vcu!==null&&vcu>=5,today<='2026-10-30',vcu===null)],
+    ['30 nov.','Palier 1 : 200 encaissés dans le mois',encN===null?'non saisi':n(encN)+' / 200',st(encN!==null&&encN>=200,today<='2026-11-30',encN===null&&today>'2026-11-30')],
+    ['31 déc.','Palier 1 tenu 2 mois de suite (nov. + déc.)',encN===null||encD===null?'en attente':n(encN)+' puis '+n(encD),st(encN>=200&&encD>=200,today<='2026-12-31',encD===null&&today>'2026-12-31')]];
+  document.getElementById('q4Jalons').innerHTML=J.map(([d,t,r,[s,c]])=>'<div class="jal"><span class="st" style="background:'+c+'">'+s+'</span><div><b>'+t+'</b><small>'+d+' · réalisé : '+r+'</small></div></div>').join('');
+  const fh=x=>x?fmtDuree(x):'—';
+  let rows='<tr><th></th>'+Q4_MOIS.map(m=>'<th>'+m[1]+'</th>').join('')+'<th>Total</th></tr>';
+  const enc=Q4_MOIS.map(([m])=>encMois(m)),dep=Q4_MOIS.map(([m])=>depMois(m));
+  const tot=a=>{const xs=a.filter(x=>x!==null);return xs.length?xs.reduce((x,y)=>x+y,0):null;};
+  const fac=Q4_MOIS.map(([m])=>facMois(m));
+  const rt=(e,f)=>f>0?Math.round((e||0)/f*100)+' %':'—';
+  rows+='<tr><td>Facturé <small style="color:var(--muted)">sessions</small></td>'+fac.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(fac))+'</td></tr>';
+  rows+='<tr><td><b>Encaissé</b> <small style="color:var(--muted)">sessions</small></td>'+enc.map(v=>'<td style="font-weight:800">'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(enc))+'</td></tr>';
+  rows+='<tr><td>Encaissé / facturé</td>'+Q4_MOIS.map((x,i)=>'<td>'+rt(enc[i],fac[i])+'</td>').join('')+'<td class="tot">'+rt(tot(enc),tot(fac))+'</td></tr>';
+  {const r=(tot(fac)||0)-(tot(enc)||0);rows+='<tr><td>Reste à encaisser <small style="color:var(--muted)">cumul Q4</small></td><td></td><td></td><td></td><td class="tot" style="color:'+(r>0?'var(--orange)':'inherit')+'">'+(tot(fac)===null?'—':n(Math.max(0,r)))+'</td></tr>';}
+  rows+='<tr><td>Dépensé + investi <small style="color:var(--muted)">sessions</small></td>'+dep.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(dep))+'</td></tr>';
+  rows+='<tr class="sep"><td colspan="5"></td></tr>';
+  CHAMPS.forEach(([c,l])=>{rows+='<tr><td>'+l+'</td>'+Q4_MOIS.map(([m])=>'<td>'+n(val(m,c))+(chiffre(m,c).auto?'<span class="auto">auto</span>':'')+'</td>').join('')+'<td class="tot">'+n(sum(c))+'</td></tr>';});
+  rows+='<tr class="sep"><td colspan="5"></td></tr>';
+  const hT=Q4_MOIS.map(([m])=>heuresMois(m)),hB=Q4_MOIS.map(([m])=>heuresMois(m,'feu'));
+  rows+='<tr><td>Heures mesurées</td>'+hT.map(x=>'<td>'+fh(x)+'</td>').join('')+'<td class="tot">'+fh(hT.reduce((a,b)=>a+b,0))+'</td></tr>';
+  rows+='<tr><td>Heures → Business</td>'+hB.map(x=>'<td>'+fh(x)+'</td>').join('')+'<td class="tot">'+fh(hB.reduce((a,b)=>a+b,0))+'</td></tr>';
+  const tx=(e,hb)=>e!==null&&hb>0?e/hb:null;const col=v=>v===null?'inherit':v>=60?'var(--green)':'var(--orange)';
+  const txs=Q4_MOIS.map(([m],i)=>tx(enc[i],hB[i]));const txQ=tx(tot(enc),hB.reduce((a,b)=>a+b,0));
+  rows+='<tr><td><b>Taux horaire réel</b><br><small style="color:var(--muted)">cible 60/h</small></td>'+txs.map(v=>'<td style="font-weight:800;color:'+col(v)+'">'+(v===null?'—':Math.round(v)+'/h')+'</td>').join('')+'<td class="tot" style="color:'+col(txQ)+'">'+(txQ===null?'—':Math.round(txQ)+'/h')+'</td></tr>';
+  rows+='<tr><td><b>Palier du mois</b></td>'+Q4_MOIS.map(([m])=>{const e=encMois(m);return '<td style="font-weight:800">'+(e===null?'—':'P'+palierDe(e))+'</td>';}).join('')+'<td></td></tr>';
+  document.getElementById('q4Table').innerHTML=rows;
+  const cm=curQ4Mois();
+  document.getElementById('q4Months').innerHTML=Q4_MOIS.map(([m,l])=>'<button class="'+(m===cm?'on':'')+'" onclick="q4Mois=\''+m+'\';renderQ4()">'+l+'</button>').join('');
+  document.getElementById('q4Form').innerHTML='<div class="grid2">'+CHAMPS.map(([c,l])=>{const x=chiffre(cm,c);const own=S.chiffres&&S.chiffres[cm]&&S.chiffres[cm][c]!==undefined;
+    return '<div><label class="f" style="margin-top:6px">'+l+'</label><input class="f" type="number" inputmode="decimal" value="'+(own?S.chiffres[cm][c]:'')+'" placeholder="'+(x.auto?x.v+' (auto)':'—')+'" onchange="setChiffre(\''+cm+'\',\''+c+'\',this.value)"></div>';}).join('')+'</div>';
+  document.getElementById('q4AutoNote').textContent=AUTO.maj?('Valeurs « auto » mises à jour par Claude le '+AUTO.maj+'. Une saisie de ta part les remplace.'):'Ces chiffres viennent d\u2019Instagram et du module Prospection : saisis-les ici en attendant le remplissage automatique.';
+}
+async function loadAuto(){try{const r=await fetch('data/kpi.json',{cache:'no-store'});if(r.ok){AUTO=await r.json();renderQ4();}}catch(e){}}
+
 /* ── Sessions : lancer / clore ── */
-function startSession(type){
+function startSession(type,domaine){
   if(S.active){toast('Une session est déjà en cours');return;}
   let client=null;
   if(type==='form'){
@@ -636,7 +842,7 @@ function startSession(type){
     const idx=parseInt(pick)-1;
     client=S.clients[idx]?S.clients[idx].nom:(pick.trim()||'Client');
   }
-  S.active={type,client,start:Date.now()};
+  S.active={type,client,start:Date.now(),dest:domaine||homeP(type)};
   save();renderAll();startClock();
 }
 function startClock(){
@@ -656,7 +862,7 @@ function openManual(){
   document.getElementById('manualHead').classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Saisie manuelle';
   document.getElementById('mDate').value=new Date().toISOString().slice(0,10);
-  document.getElementById('mDuree').value=1;
+  document.getElementById('mDuree').value=60;
   document.getElementById('mType').value='pratique';
   manualType('pratique');
 }
@@ -675,6 +881,8 @@ function manualType(t){
   genResetFields();
   genFillCat();
   document.getElementById('genPilier').value=BLOCK_HOME_PILLAR[t]||'terre';
+  S.active.dest=homeP(t);
+  renderCloseChips();
 }
 function fillClientSelect(){
   const sel=document.getElementById('fClient');
@@ -685,11 +893,18 @@ function openClose(){
   document.getElementById('startCard').classList.add('hidden');
   document.getElementById('liveCard').classList.add('hidden');
   const cc=document.getElementById('closeCard');cc.classList.remove('hidden');
-  if(!manualMode)document.getElementById('manualHead').classList.add('hidden');
+  document.getElementById('manualHead').classList.remove('hidden');
   document.getElementById('closeTitle').textContent='Clore — '+TYPES[S.active.type];
   genResetFields();
   genFillCat();
   document.getElementById('genPilier').value=BLOCK_HOME_PILLAR[S.active.type]||'terre';
+  document.getElementById('moreBox').open=false;
+  if(!manualMode){
+    document.getElementById('mType').value=S.active.type;
+    document.getElementById('mDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('mDuree').value=Math.max(1,Math.round((Date.now()-S.active.start)/60000));
+  }
+  renderCloseChips();
 }
 function cancelClose(){
   if(manualMode){S.active=null;manualMode=false;editIdx=null;}
@@ -701,11 +916,10 @@ function saveClose(){
   const a=S.active;if(!a)return;
   let dureeH=Math.round((Date.now()-a.start)/36000)/100;
   let when=new Date().toISOString();
-  if(manualMode){
-    dureeH=parseFloat(document.getElementById('mDuree').value)||0.5;
-    const d=document.getElementById('mDate').value;
-    if(d)when=d+'T12:00:00.000Z';
-  }
+  const fd=parseFloat(String(document.getElementById('mDuree').value).replace(',','.'));
+  if(fd>0)dureeH=Math.round(fd)/60;else if(manualMode)dureeH=0.5;
+  const d=document.getElementById('mDate').value;
+  if(d&&(manualMode||d!==when.slice(0,10)))when=d+'T12:00:00.000Z';
   const list=BLOCKS[a.type];
   const stade=parseInt(document.getElementById('genCat').value)||0;
   const sess={
@@ -717,6 +931,7 @@ function saveClose(){
     investi:parseFloat(document.getElementById('genInvesti').value)||0,
     depense:parseFloat(document.getElementById('genDepense').value)||0,
     cash:parseFloat(document.getElementById('genRevenu').value)||0,
+    facture:parseFloat(document.getElementById('genFacture').value)||0,
     retard:document.getElementById('genRetard').checked
   };
 
@@ -758,8 +973,9 @@ function editSession(i){
   if(!BLOCKS[s.type]){toast('Session d\u2019un ancien format — suppression puis recréation recommandée');return;}
   document.getElementById('mType').value=s.type;
   manualType(s.type);
+  S.active.dest=s.pilier||homeP(s.type);renderCloseChips();
   document.getElementById('mDate').value=s.date.slice(0,10);
-  document.getElementById('mDuree').value=s.duree||1;
+  document.getElementById('mDuree').value=Math.round((s.duree||1)*60);
   document.getElementById('genCat').value=s.stade||0;
   document.getElementById('genTitre').value=s.titre||'';
   document.getElementById('genPilier').value=s.pilier||'terre';
@@ -767,6 +983,7 @@ function editSession(i){
   document.getElementById('genInvesti').value=s.investi||'';
   document.getElementById('genDepense').value=s.depense||'';
   document.getElementById('genRevenu').value=s.cash||'';
+  document.getElementById('genFacture').value=s.facture||'';
   document.getElementById('genRetard').checked=!!s.retard;
   document.getElementById('genIsClient').checked=!!s.isClient;
   genClientToggle();
@@ -816,11 +1033,11 @@ function exportProspects(){
 
 /* ── Agrégation ── */
 function agg(list){
-  const t={cash:0,dep:0,investi:0,revenus:0,h:0,n:list.length,retards:0,
+  const t={cash:0,facture:0,dep:0,investi:0,revenus:0,h:0,n:list.length,retards:0,
     byBlock:{pratique:0,eclaire:0,gere:0,produis:0,connecte:0},
     byPillar:{terre:0,vide:0,eau:0,feu:0,vent:0}};
   list.forEach(s=>{
-    t.cash+=s.cash||0;t.dep+=(s.depense||0)+(s.investi||0);t.investi+=s.investi||0;t.revenus+=s.revenus||0;
+    t.cash+=s.cash||0;t.facture+=s.facture||0;t.dep+=(s.depense||0)+(s.investi||0);t.investi+=s.investi||0;t.revenus+=s.revenus||0;
     t.h+=s.duree||0;if(s.retard)t.retards++;
     if(t.byBlock.hasOwnProperty(s.type))t.byBlock[s.type]+=s.duree||0;
     if(s.pilier&&t.byPillar.hasOwnProperty(s.pilier))t.byPillar[s.pilier]+=s.duree||0;
@@ -839,6 +1056,7 @@ function repartitionHTML(agg,daysInPeriod){
   return '<div style="margin-top:6px"><small style="color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:10px">Par bloc (verbe)</small><div style="margin-top:8px">'+rows(agg.byBlock,blockLabels)+'</div>'+
   '<small style="color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:10px">Par pilier</small><div style="margin-top:8px">'+rows(agg.byPillar,{})+'</div></div>';
 }
+function ratioEF(e,f){return f>0?Math.round(e/f*100)+' %':'—';}
 function kpi(v,l,cls){return '<div class="kpi'+(cls?' '+cls:'')+'"><b>'+v+'</b><small>'+l+'</small></div>';}
 function fmtDuree(h){
   if(!h)return '0min';
@@ -847,6 +1065,23 @@ function fmtDuree(h){
   if(hh===0)return mm+'min';
   if(mm===0)return hh+'h';
   return hh+'h'+String(mm).padStart(2,'0');
+}
+/* Navigation de période : 0 = en cours, -1 = précédente… */
+const PER={w:0,m:0};
+function wkRange(){const d=new Date();d.setDate(d.getDate()+7*PER.w);return monBounds(d);}
+function refMonth(){const n=new Date();return new Date(n.getFullYear(),n.getMonth()+PER.m,1);}
+function inRefMonth(d){const r=refMonth();return d.getMonth()===r.getMonth()&&d.getFullYear()===r.getFullYear();}
+function perMove(k){if(currentView==='semaine')PER.w=Math.min(0,PER.w+k);else PER.m=Math.min(0,PER.m+k);renderPerNav();renderAll();}
+function perReset(){PER.w=0;PER.m=0;renderPerNav();renderAll();}
+function renderPerNav(){
+  const nav=document.getElementById('perNav');const on=currentView==='semaine'||currentView==='mois';
+  nav.classList.toggle('hidden',!on);if(!on)return;
+  const f=d=>d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'});let lab,off;
+  if(currentView==='semaine'){const[a,b]=wkRange();off=PER.w;lab=(off===0?'Cette semaine':off===-1?'Semaine dernière':'Semaine')+' · '+f(a)+' – '+f(b);}
+  else{off=PER.m;const r=refMonth();lab=r.toLocaleDateString('fr-CH',{month:'long',year:'numeric'});lab=lab.charAt(0).toUpperCase()+lab.slice(1)+(off===0?' · en cours':'');}
+  document.getElementById('perLab').innerHTML=escH(lab)+(off!==0?'<small onclick="perReset()">Revenir à aujourd\u2019hui</small>':'');
+  document.getElementById('perNext').disabled=off===0;
+  const wt=document.getElementById('wkTitle');if(wt)wt.textContent=PER.w===0?'Semaine en cours':'Semaine affichée';
 }
 function monBounds(d){const s=new Date(d);s.setDate(s.getDate()-((s.getDay()+6)%7));s.setHours(0,0,0,0);const e=new Date(s);e.setDate(e.getDate()+6);e.setHours(23,59,59,999);return[s,e];}
 
@@ -858,7 +1093,8 @@ function renderAll(){
   const on=!!S.active;
   document.getElementById('liveCard').classList.toggle('hidden',!on);
   document.getElementById('startCard').classList.toggle('hidden',on||!document.getElementById('closeCard').classList.contains('hidden'));
-  if(on)document.getElementById('liveType').textContent=TYPES[S.active.type];
+  if(on)document.getElementById('liveType').textContent=TYPES[S.active.type]+(S.active.dest?' → '+DEST_LABEL[S.active.dest]:'');
+  renderTemps();
 
   const todayK=new Date().toISOString().slice(0,10);
   const tl=S.sessions.filter(s=>s.date.slice(0,10)===todayK);
@@ -873,29 +1109,31 @@ function renderAll(){
     projKpisHTML(S.sessions,'feu',false);
   document.getElementById('histToday').innerHTML=histHTML(tl.slice(0,8),true);
 
-  const[wStart,wEnd]=monBounds(new Date());
+  const[wStart,wEnd]=wkRange();
   const wl=S.sessions.filter(s=>{const d=new Date(s.date);return d>=wStart&&d<=wEnd;});
   const w=agg(wl);
   document.getElementById('weekKpis').innerHTML=
     kpi(fmtDuree(w.h),'Temps total tracké','dark')+
     kpi(w.n,'Sessions','dark')+
-    kpi(Math.round(w.cash)+' CHF','Cash encaissé','dark')+
+    kpi(Math.round(w.facture)+' CHF','Facturé','dark')+
+    kpi(Math.round(w.cash)+' CHF','Encaissé','dark')+
+    kpi(ratioEF(w.cash,w.facture),'Encaissé / facturé','dark')+
     kpi(w.retards,'Retards paiement','dark')+
-    projKpisHTML(S.sessions,'feu',false)+
-    repartitionHTML(w,7);
+    projKpisHTML(S.sessions,'feu',false);
 
   const now=new Date();
-  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return inRefMonth(d);});
   const mo=agg(ml);
   const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   document.getElementById('monthKpis').innerHTML=
     kpi(fmtDuree(mo.h),'Temps total tracké','dark')+
     kpi(mo.n,'Sessions','dark')+
-    kpi(Math.round(mo.cash)+' CHF','Cash encaissé','dark')+
+    kpi(Math.round(mo.facture)+' CHF','Facturé','dark')+
+    kpi(Math.round(mo.cash)+' CHF','Encaissé','dark')+
+    kpi(ratioEF(mo.cash,mo.facture),'Encaissé / facturé','dark')+
     kpi((S.structPct||0)+'%','Structure suisse','dark')+
     kpi(mo.retards,'Retards paiement','dark')+
-    projKpisHTML(S.sessions,'feu',true)+
-    repartitionHTML(mo,daysInMonth);
+    projKpisHTML(S.sessions,'feu',true);
 
   document.getElementById('hTot').value=Math.round(mo.h*10)/10+' h';
   const cout=Math.round(mo.h*S.coutH),marge=Math.round(mo.cash-cout);
@@ -937,7 +1175,7 @@ function histHTML(list,delBtn){
     const when=d.toLocaleDateString('fr-CH',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
     let main='',val='';
     if(s.categorie){
-      main=(s.titre?s.titre+' · ':'')+s.categorie+(s.pilier?' → '+PILLAR_LABEL[s.pilier]:'');
+      main=(VERBE[s.type]||TYPES[s.type]||'')+' → '+(DEST_LABEL[s.pilier]||PILLAR_LABEL[s.pilier]||'')+(s.domaine?' · '+escH(s.domaine):'')+(s.titre?' · '+escH(s.titre):'');
       const parts=[];
       if(s.isClient)parts.push((s.client||'client'));
       if(s.cash)parts.push(Math.round(s.cash)+' CHF');
@@ -1062,7 +1300,7 @@ function renderCorps(){
   document.getElementById('corpsHistToday').innerHTML='<ul class="hist">'+(todayList.length?todayList.map((e)=>corpsHistItem(e,S.corps.indexOf(e),true)).join(''):'<li><small style="color:var(--muted)">Rien encore pour aujourd’hui.</small></li>')+'</ul>';
   document.getElementById('corpsJourProjKpis').innerHTML=projKpisHTML(S.sessions,'terre',false);
 
-  const[wStart,wEnd]=monBounds(new Date());
+  const[wStart,wEnd]=wkRange();
   const wl=S.corps.filter(e=>{const d=new Date(e.date+'T12:00');return d>=wStart&&d<=wEnd;});
   const w=corpsAgg(wl);
   document.getElementById('corpsWeekKpis').innerHTML=
@@ -1078,7 +1316,7 @@ function renderCorps(){
     projKpisHTML(S.sessions,'terre',false);
 
   const now=new Date();
-  const ml=S.corps.filter(e=>{const d=new Date(e.date+'T12:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const ml=S.corps.filter(e=>{const d=new Date(e.date+'T12:00');return inRefMonth(d);});
   const mo=corpsAgg(ml);
   document.getElementById('corpsMonthKpis').innerHTML=
     kpi(mo.poidsMoy?Math.round(mo.poidsMoy*10)/10+' kg':'—','Poids moyen','dark')+
@@ -1148,7 +1386,7 @@ function renderFinances(){
   document.getElementById('finRcHist').innerHTML='<ul class="hist">'+(rcListToday.length?rcListToday.map(rcHistItem).join(''):'<li><small style="color:var(--muted)">Aucun projet aujourd\u2019hui.</small></li>')+'</ul>';
 
 
-  const[wStart,wEnd]=monBounds(new Date());
+  const[wStart,wEnd]=wkRange();
   const wl=S.sessions.filter(s=>{const d=new Date(s.date);return d>=wStart&&d<=wEnd;});
   const fW=finAgg(wl);
   const rcW=rcAgg(wl);
@@ -1164,7 +1402,7 @@ function renderFinances(){
     projKpisHTML(S.sessions,'eau',false);
 
   const now=new Date();
-  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return inRefMonth(d);});
   const fM=finAgg(ml);
   const rcM=rcAgg(ml);
   const eauMonth=ml.filter(s=>s.pilier==='eau');
@@ -1236,7 +1474,7 @@ function renderRelations(){
   const todayShared=relFilter(tl).filter(s=>s.soloPartage==='partage');
   document.getElementById('relHistToday').innerHTML='<ul class="hist">'+(todayShared.length?todayShared.map(relHistItem).join(''):'<li><small style="color:var(--muted)">Rien de partagé aujourd\u2019hui.</small></li>')+'</ul>';
 
-  const[wStart,wEnd]=monBounds(new Date());
+  const[wStart,wEnd]=wkRange();
   const wl=S.sessions.filter(s=>{const d=new Date(s.date);return d>=wStart&&d<=wEnd;});
   const rW=relAgg(wl);
   const dW=discSum(wStart.toISOString().slice(0,10),wEnd.toISOString().slice(0,10));
@@ -1251,7 +1489,7 @@ function renderRelations(){
     projKpisHTML(S.sessions,'vent',false);
 
   const now=new Date();
-  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return inRefMonth(d);});
   const rM=relAgg(ml);
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
   const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
@@ -1320,7 +1558,7 @@ function renderVide(){
     return '<li><div class="hmain"><b>'+(s.titre||s.categorie)+'</b><small>'+s.categorie+' · '+fmtDuree(s.duree)+'</small></div><button class="ic" onclick="editSession('+idx+')" style="color:var(--teal)">✎</button></li>';
   }).join(''):'<li><small style="color:var(--muted)">Rien aujourd\u2019hui.</small></li>')+'</ul>';
 
-  const[wStart,wEnd]=monBounds(new Date());
+  const[wStart,wEnd]=wkRange();
   const wStartK=wStart.toISOString().slice(0,10),wEndK=wEnd.toISOString().slice(0,10);
   const wl=S.sessions.filter(s=>{const d=new Date(s.date);return d>=wStart&&d<=wEnd;});
   const connexW=connexSum(wStartK,wEndK);
@@ -1335,7 +1573,7 @@ function renderVide(){
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
   const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
   const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const ml=S.sessions.filter(s=>{const d=new Date(s.date);return inRefMonth(d);});
   const connexM=connexSum(monthStart,monthEnd);
   const projM=videProjets(ml);
   const formeOuPlus=projM.filter(p=>p.stade>=2).length;
@@ -1352,6 +1590,7 @@ function renderVide(){
 }
 
 load();
+loadAuto();
 </script>
 </body>
 </html>
