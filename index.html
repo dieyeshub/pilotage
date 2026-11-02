@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Di-Eyes — Dashboard 5 Piliers</title>
 <style>
+  .pg{height:7px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:6px}.pg i{display:block;height:100%;border-radius:99px}
   :root{
     --ink-bg:#0F2E2E; --teal:#306868; --teal-deep:#1E4747;
     --amber:#F8B346; --orange:#E45027; --violet:#8B5FBF;
@@ -268,7 +269,14 @@
           <div><label class="f">Facturé (CHF)</label><input class="f" type="number" inputmode="decimal" id="genFacture" placeholder="0"></div>
           <div><label class="f">Encaissé (CHF)</label><input class="f" type="number" inputmode="decimal" id="genRevenu" placeholder="0"></div>
         </div>
-        <small style="color:var(--muted)">Facultatif. Facture envoyée → « Facturé ». Paiement reçu → « Encaissé » (idéalement dans une session Je gère). Les deux s'additionnent dans Semaine, Mois et Q4.</small>
+        <label class="f" style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <input type="checkbox" id="genNouvSource" style="width:18px;height:18px"> Cet encaissement vient d'une nouvelle source de revenus
+        </label>
+        <div class="grid2">
+          <div><label class="f">Nouveaux mandats signés</label><input class="f" type="number" inputmode="numeric" min="0" step="1" id="genMandats" placeholder="0"></div>
+          <div></div>
+        </div>
+        <small style="color:var(--muted)">Tout est facultatif. Facture envoyée → « Facturé ». Paiement reçu → « Encaissé ». Contrat signé (DI-EYES, Personal Genius, coaching…) → « Nouveaux mandats ». Tout s'additionne dans Semaine, Mois et Q4.</small>
         <label class="f">Note (facultatif)</label>
         <textarea class="f" id="genNote" rows="2" placeholder="Ce que j'ai fait"></textarea>
       </div>
@@ -337,8 +345,10 @@
   <!-- ═══ Q4 : OBJECTIFS & RÉCAP DU TRIMESTRE ═══ -->
   <div class="view" id="v-business-q4">
     <div class="card" style="background:var(--ink-bg);color:#fff">
-      <h2 class="sec" style="color:var(--business)">Objectifs Q4 · 1er oct. – 31 déc.</h2>
+      <h2 class="sec" style="color:var(--business)">Objectifs business · Q4</h2>
       <div id="q4Jalons"></div>
+      <h2 class="sec" style="color:var(--business);margin-top:16px">Objectifs visibilité · 500 followers au 31 déc.</h2>
+      <div id="q4Jalons2"></div>
     </div>
     <div class="card">
       <h2 class="sec">Tableau du trimestre</h2>
@@ -346,7 +356,12 @@
       <small style="color:var(--muted);display:block;margin-top:8px">Facturé, encaissé et dépenses = total de tes sessions, rien à saisir. Le ratio mensuel peut dépasser 100 % quand une facture d'un mois est payée le suivant : lis surtout le total du trimestre. Taux horaire réel = encaissé ÷ heures à destination du Business. Palier = encaissé du mois sur ton échelle (200 · 500 · 1000 · 2100 · 3500).</small>
     </div>
     <div class="card">
-      <h2 class="sec">Chiffres de prospection du mois</h2>
+      <h2 class="sec">Nouvelles sources de revenus (2 à identifier d'ici le 30 nov.)</h2>
+      <div id="q4Sources"></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input class="f" type="text" id="srcNew" placeholder="Ex : formation en ligne, affiliation…" onkeydown="if(event.key==='Enter')addSource()"><button class="btn main" style="width:auto;padding:0 16px" onclick="addSource()">Ajouter</button></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Chiffres du mois · prospection & visibilité</h2>
       <div class="mchips" id="q4Months"></div>
       <div id="q4Form"></div>
       <small style="color:var(--muted);display:block;margin-top:8px" id="q4AutoNote"></small>
@@ -775,7 +790,7 @@ function renderTemps(){
 /* ══════════ Q4 : objectifs, chiffres du mois, rentabilité ══════════ */
 const Q4_MOIS=[['2026-10','Oct.'],['2026-11','Nov.'],['2026-12','Déc.']];
 const PALIERS=[200,500,1000,2100,3500];
-const CHAMPS=[['comptes','Comptes touchés'],['visites','Visites de profil'],['conversations','Conversations ouvertes'],['entretiens','Entretiens (CAP)'],['ventesComeUp','Ventes ComeUp']];
+const CHAMPS=[['followersDI','Followers DI-EYES (fin de mois)'],['followersPG','Followers Personal Genius (fin de mois)'],['pubsDI','Publications DI-EYES'],['pubsPG','Publications Personal Genius'],['comptes','Comptes touchés'],['visites','Visites de profil'],['conversations','Conversations ouvertes'],['entretiens','Entretiens (CAP)'],['ventesComeUp','Ventes ComeUp']];
 let q4Mois=null,AUTO={};
 function curQ4Mois(){if(q4Mois)return q4Mois;const k=new Date().toISOString().slice(0,7);return Q4_MOIS.some(m=>m[0]===k)?k:'2026-10';}
 function encMois(m){const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.cash||0),0):null;}
@@ -794,13 +809,33 @@ function renderQ4(){
   const sum=c=>{const xs=Q4_MOIS.map(([m])=>val(m,c)).filter(x=>x!==null);return xs.length?xs.reduce((a,b)=>a+b,0):null;};
   const today=new Date().toISOString().slice(0,10);
   const st=(ok,pending,vide)=>ok?['Atteint','var(--green)']:vide?['À saisir','#5E7876']:pending?['En cours','#5E7876']:['Manqué','var(--orange)'];
-  const ent=val('2026-10','entretiens'),vcu=val('2026-10','ventesComeUp'),encN=val('2026-11','encaisse'),encD=val('2026-12','encaisse');
-  const J=[
-    ['30 oct.','10 entretiens (CAP) en octobre',ent===null?'non saisi':n(ent)+' / 10',st(ent!==null&&ent>=10,today<='2026-10-30',ent===null)],
-    ['30 oct.','5 ventes ComeUp',vcu===null?'non saisi':n(vcu)+' / 5',st(vcu!==null&&vcu>=5,today<='2026-10-30',vcu===null)],
-    ['30 nov.','Palier 1 : 200 encaissés dans le mois',encN===null?'non saisi':n(encN)+' / 200',st(encN!==null&&encN>=200,today<='2026-11-30',encN===null&&today>'2026-11-30')],
-    ['31 déc.','Palier 1 tenu 2 mois de suite (nov. + déc.)',encN===null||encD===null?'en attente':n(encN)+' puis '+n(encD),st(encN>=200&&encD>=200,today<='2026-12-31',encD===null&&today>'2026-12-31')]];
-  document.getElementById('q4Jalons').innerHTML=J.map(([d,t,r,[s,c]])=>'<div class="jal"><span class="st" style="background:'+c+'">'+s+'</span><div><b>'+t+'</b><small>'+d+' · réalisé : '+r+'</small></div></div>').join('');
+  const sumS=(f,m)=>S.sessions.filter(s=>s.date>='2026-10-01'&&s.date<'2027-01-01'&&(!m||s.date.slice(0,7)===m)).reduce((a,s)=>a+(f(s)||0),0);
+  const encQ=sumS(s=>s.cash),encNov=sumS(s=>s.cash,'2026-11'),manQ=sumS(s=>s.mandats),manNov=sumS(s=>s.mandats,'2026-11');
+  const srcRev=sumS(s=>s.nouvSource?s.cash:0),nSrc=(S.sources||[]).length;
+  const last=c=>{for(const[m]of [...Q4_MOIS].reverse()){const v=val(m,c);if(v!==null)return v;}return null;};
+  // [titre, échéance (AAAA-MM-JJ), réalisé, cible, seuil jaune (facultatif), unité]
+  const OBJ=[
+    ['Encaissé sur le trimestre','2026-12-31',encQ,4000,null,' €'],
+    ['dont encaissé en novembre','2026-11-30',encNov,3000,null,' €'],
+    ['Nouveaux mandats sur le trimestre','2026-12-31',manQ,10,null,''],
+    ['dont nouveaux mandats en novembre','2026-11-30',manNov,5,null,''],
+    ['Nouvelles sources de revenus identifiées','2026-11-30',nSrc,2,null,''],
+    ['Revenus des nouvelles sources','2026-12-31',srcRev,1000,500,' €']];
+  const OBJ2=[
+    ['Followers DI-EYES','2026-12-31',last('followersDI'),500,null,''],
+    ['Followers Personal Genius','2026-12-31',last('followersPG'),500,null,''],
+    ['Publications DI-EYES en novembre','2026-11-30',val('2026-11','pubsDI'),12,null,''],
+    ['Publications Personal Genius en novembre','2026-11-30',val('2026-11','pubsPG'),12,null,''],
+    ['Publications DI-EYES en décembre','2026-12-31',val('2026-12','pubsDI'),12,null,''],
+    ['Publications Personal Genius en décembre','2026-12-31',val('2026-12','pubsPG'),12,null,'']];
+  const fd=d=>{const[y,m,j]=d.split('-');return +j+' '+['','janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][+m];};
+  const jal=([t,d,r,c,y,u])=>{const pct=r===null?0:Math.min(100,r/c*100);
+    const s=r!==null&&r>=c?['Atteint','var(--green)']:r!==null&&y!==null&&r>=y?['Palier jaune','var(--business)']:r===null?['À saisir','#5E7876']:today<=d?['En cours','#5E7876']:['Manqué','var(--orange)'];
+    const col=r!==null&&r>=c?'var(--green)':r!==null&&y!==null&&r>=y?'var(--business)':today>d?'var(--orange)':'var(--amber)';
+    return '<div class="jal"><span class="st" style="background:'+s[1]+'">'+s[0]+'</span><div style="flex:1"><b>'+t+'</b><small>'+(r===null?'—':n(r)+u)+' / '+n(c)+u+(y?' (jaune à '+n(y)+u+')':'')+' · échéance '+fd(d)+'</small><div class="pg"><i style="width:'+pct+'%;background:'+col+'"></i></div></div></div>';};
+  document.getElementById('q4Jalons').innerHTML=OBJ.map(jal).join('');
+  document.getElementById('q4Jalons2').innerHTML=OBJ2.map(jal).join('');
+  document.getElementById('q4Sources').innerHTML=(S.sources||[]).map((x,i)=>'<div class="pforf" style="display:flex;justify-content:space-between;align-items:center"><span><b>'+escH(x.nom)+'</b> <small style="color:var(--muted)">identifiée le '+escH(x.date)+'</small></span><button class="ic" style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer" onclick="delSource('+i+')">✕</button></div>').join('')||'<small style="color:var(--muted)">Aucune source pour l’instant. Pour suivre ce qu’elle rapporte, coche « nouvelle source » sur l’encaissement dans la session.</small>';
   const fh=x=>x?fmtDuree(x):'—';
   let rows='<tr><th></th>'+Q4_MOIS.map(m=>'<th>'+m[1]+'</th>').join('')+'<th>Total</th></tr>';
   const enc=Q4_MOIS.map(([m])=>encMois(m)),dep=Q4_MOIS.map(([m])=>depMois(m));
@@ -811,9 +846,12 @@ function renderQ4(){
   rows+='<tr><td><b>Encaissé</b> <small style="color:var(--muted)">sessions</small></td>'+enc.map(v=>'<td style="font-weight:800">'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(enc))+'</td></tr>';
   rows+='<tr><td>Encaissé / facturé</td>'+Q4_MOIS.map((x,i)=>'<td>'+rt(enc[i],fac[i])+'</td>').join('')+'<td class="tot">'+rt(tot(enc),tot(fac))+'</td></tr>';
   {const r=(tot(fac)||0)-(tot(enc)||0);rows+='<tr><td>Reste à encaisser <small style="color:var(--muted)">cumul Q4</small></td><td></td><td></td><td></td><td class="tot" style="color:'+(r>0?'var(--orange)':'inherit')+'">'+(tot(fac)===null?'—':n(Math.max(0,r)))+'</td></tr>';}
+  const manM=Q4_MOIS.map(([m])=>sumS(s=>s.mandats,m)),srcM=Q4_MOIS.map(([m])=>sumS(s=>s.nouvSource?s.cash:0,m));
+  rows+='<tr><td>Nouveaux mandats <small style="color:var(--muted)">sessions</small></td>'+manM.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(manQ)+'</td></tr>';
+  rows+='<tr><td>Encaissé nouvelles sources</td>'+srcM.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(srcRev)+'</td></tr>';
   rows+='<tr><td>Dépensé + investi <small style="color:var(--muted)">sessions</small></td>'+dep.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(dep))+'</td></tr>';
   rows+='<tr class="sep"><td colspan="5"></td></tr>';
-  CHAMPS.forEach(([c,l])=>{rows+='<tr><td>'+l+'</td>'+Q4_MOIS.map(([m])=>'<td>'+n(val(m,c))+(chiffre(m,c).auto?'<span class="auto">auto</span>':'')+'</td>').join('')+'<td class="tot">'+n(sum(c))+'</td></tr>';});
+  CHAMPS.forEach(([c,l])=>{rows+='<tr><td>'+l+'</td>'+Q4_MOIS.map(([m])=>'<td>'+n(val(m,c))+(chiffre(m,c).auto?'<span class="auto">auto</span>':'')+'</td>').join('')+'<td class="tot">'+n(c.startsWith('followers')?last(c):sum(c))+'</td></tr>';});
   rows+='<tr class="sep"><td colspan="5"></td></tr>';
   const hT=Q4_MOIS.map(([m])=>heuresMois(m)),hB=Q4_MOIS.map(([m])=>heuresMois(m,'feu'));
   rows+='<tr><td>Heures mesurées</td>'+hT.map(x=>'<td>'+fh(x)+'</td>').join('')+'<td class="tot">'+fh(hT.reduce((a,b)=>a+b,0))+'</td></tr>';
@@ -829,6 +867,8 @@ function renderQ4(){
     return '<div><label class="f" style="margin-top:6px">'+l+'</label><input class="f" type="number" inputmode="decimal" value="'+(own?S.chiffres[cm][c]:'')+'" placeholder="'+(x.auto?x.v+' (auto)':'—')+'" onchange="setChiffre(\''+cm+'\',\''+c+'\',this.value)"></div>';}).join('')+'</div>';
   document.getElementById('q4AutoNote').textContent=AUTO.maj?('Valeurs « auto » mises à jour par Claude le '+AUTO.maj+'. Une saisie de ta part les remplace.'):'Ces chiffres viennent d\u2019Instagram et du module Prospection : saisis-les ici en attendant le remplissage automatique.';
 }
+function addSource(){const i=document.getElementById('srcNew');const v=i.value.trim();if(!v)return;if(!S.sources)S.sources=[];S.sources.push({nom:v,date:new Date().toLocaleDateString('fr-CH')});i.value='';save('Source ajoutée ✓');renderQ4();}
+function delSource(i){if(!confirm('Retirer cette source ?'))return;S.sources.splice(i,1);save('Retirée');renderQ4();}
 async function loadAuto(){try{const r=await fetch('data/kpi.json',{cache:'no-store'});if(r.ok){AUTO=await r.json();renderQ4();}}catch(e){}}
 
 /* ── Sessions : lancer / clore ── */
@@ -932,6 +972,8 @@ function saveClose(){
     depense:parseFloat(document.getElementById('genDepense').value)||0,
     cash:parseFloat(document.getElementById('genRevenu').value)||0,
     facture:parseFloat(document.getElementById('genFacture').value)||0,
+    mandats:parseInt(document.getElementById('genMandats').value)||0,
+    nouvSource:document.getElementById('genNouvSource').checked,
     retard:document.getElementById('genRetard').checked
   };
 
@@ -984,6 +1026,8 @@ function editSession(i){
   document.getElementById('genDepense').value=s.depense||'';
   document.getElementById('genRevenu').value=s.cash||'';
   document.getElementById('genFacture').value=s.facture||'';
+  document.getElementById('genMandats').value=s.mandats||'';
+  document.getElementById('genNouvSource').checked=!!s.nouvSource;
   document.getElementById('genRetard').checked=!!s.retard;
   document.getElementById('genIsClient').checked=!!s.isClient;
   genClientToggle();
