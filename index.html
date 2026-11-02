@@ -845,7 +845,7 @@ function renderQ4(){
   rows+='<tr><td>Facturé <small style="color:var(--muted)">sessions</small></td>'+fac.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(fac))+'</td></tr>';
   rows+='<tr><td><b>Encaissé</b> <small style="color:var(--muted)">sessions</small></td>'+enc.map(v=>'<td style="font-weight:800">'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(enc))+'</td></tr>';
   rows+='<tr><td>Encaissé / facturé</td>'+Q4_MOIS.map((x,i)=>'<td>'+rt(enc[i],fac[i])+'</td>').join('')+'<td class="tot">'+rt(tot(enc),tot(fac))+'</td></tr>';
-  {const r=(tot(fac)||0)-(tot(enc)||0);rows+='<tr><td>Reste à encaisser <small style="color:var(--muted)">cumul Q4</small></td><td></td><td></td><td></td><td class="tot" style="color:'+(r>0?'var(--orange)':'inherit')+'">'+(tot(fac)===null?'—':n(Math.max(0,r)))+'</td></tr>';}
+  {const all=S.sessions.reduce((a,s)=>a+(s.facture||0)-(s.cash||0),0),r=Math.max(0,all);rows+='<tr><td>Reste à encaisser <small style="color:var(--muted)">toutes factures</small></td><td></td><td></td><td></td><td class="tot" style="color:'+(r>0?'var(--orange)':'inherit')+'">'+n(r)+'</td></tr>';}
   const manM=Q4_MOIS.map(([m])=>sumS(s=>s.mandats,m)),srcM=Q4_MOIS.map(([m])=>sumS(s=>s.nouvSource?s.cash:0,m));
   rows+='<tr><td>Nouveaux mandats <small style="color:var(--muted)">sessions</small></td>'+manM.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(manQ)+'</td></tr>';
   rows+='<tr><td>Encaissé nouvelles sources</td>'+srcM.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(srcRev)+'</td></tr>';
@@ -1633,7 +1633,19 @@ function renderVide(){
   ).join(''):'<small style="color:var(--muted)">Aucun projet ce mois-ci.</small>';
 }
 
-load();
+/* Import privé par lien : #import=<base64url JSON {sessions:[...]}>. Le contenu après # n'est jamais envoyé au serveur. */
+async function importFromHash(){
+  const m=location.hash.match(/^#import=([A-Za-z0-9_-]+)/);if(!m)return;
+  history.replaceState(null,'',location.pathname+location.search);
+  let data;try{const b=m[1].replace(/-/g,'+').replace(/_/g,'/');data=JSON.parse(decodeURIComponent(escape(atob(b))));}catch(e){toast('Lien d\u2019import illisible');return;}
+  const list=(data&&data.sessions)||[];const ids=new Set(S.sessions.map(s=>s.id).filter(Boolean));
+  const nouv=list.filter(s=>s&&s.id&&!ids.has(s.id)&&s.date&&s.type);
+  if(!nouv.length){toast('Déjà importé : rien de nouveau');return;}
+  if(!confirm('Ajouter '+nouv.length+' session(s) préparée(s) par Claude ?\n\n'+nouv.map(s=>s.date.slice(0,10)+' · '+(TYPES[s.type]||s.type)+(s.facture?' · facturé '+s.facture:'')+(s.cash?' · encaissé '+s.cash:'')).join('\n')))return;
+  nouv.forEach(s=>S.sessions.push(s));S.sessions.sort((x,y)=>y.date.localeCompare(x.date));
+  await save(nouv.length+' session(s) importée(s) ✓');renderAll();
+}
+load().then(importFromHash);
 loadAuto();
 </script>
 </body>
