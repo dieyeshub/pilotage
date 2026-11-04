@@ -790,7 +790,7 @@ function renderTemps(){
 /* ══════════ Q4 : objectifs, chiffres du mois, rentabilité ══════════ */
 const Q4_MOIS=[['2026-10','Oct.'],['2026-11','Nov.'],['2026-12','Déc.']];
 const PALIERS=[200,500,1000,2100,3500];
-const CHAMPS=[['followersDI','Followers DI-EYES (fin de mois)'],['followersPG','Followers Personal Genius (fin de mois)'],['pubsDI','Publications DI-EYES'],['pubsPG','Publications Personal Genius'],['comptes','Comptes touchés'],['visites','Visites de profil'],['conversations','Conversations ouvertes'],['entretiens','Entretiens (CAP)'],['ventesComeUp','Ventes ComeUp']];
+const CHAMPS=[['followersDI','Followers DI-EYES (fin de mois)'],['followersPG','Followers Personal Genius (fin de mois)'],['pubsDI','Publications DI-EYES'],['pubsPG','Publications Personal Genius'],['comptes','Comptes touchés'],['messages','Messages de prospection envoyés'],['visites','Visites de profil'],['conversations','Conversations ouvertes'],['entretiens','Entretiens (CAP)'],['ventesComeUp','Ventes ComeUp']];
 let q4Mois=null,AUTO={};
 function curQ4Mois(){if(q4Mois)return q4Mois;const k=new Date().toISOString().slice(0,7);return Q4_MOIS.some(m=>m[0]===k)?k:'2026-10';}
 function encMois(m){const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.cash||0),0):null;}

@@ -1,5 +1,5 @@
 {
-  "maj": "02.11.2026",
+  "maj": "04.11.2026",
   "source": "Module Prospection DI-EYES (totaux uniquement, aucun nom de prospect)",
   "mois": {
     "2026-10": {
@@ -7,6 +7,10 @@
       "entretiens": 1,
       "followersDI": 146,
       "followersPG": 56
+    },
+    "2026-11": {
+      "messages": 24,
+      "pubsDI": 1
     }
   }
 }
