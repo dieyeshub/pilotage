@@ -273,10 +273,10 @@
           <input type="checkbox" id="genNouvSource" style="width:18px;height:18px"> Cet encaissement vient d'une nouvelle source de revenus
         </label>
         <div class="grid2">
+          <div><label class="f">Devis envoyé (CHF)</label><input class="f" type="number" inputmode="decimal" id="genDevis" placeholder="0"></div>
           <div><label class="f">Nouveaux mandats signés</label><input class="f" type="number" inputmode="numeric" min="0" step="1" id="genMandats" placeholder="0"></div>
-          <div></div>
         </div>
-        <small style="color:var(--muted)">Tout est facultatif. Facture envoyée → « Facturé ». Paiement reçu → « Encaissé ». Contrat signé (DI-EYES, Personal Genius, coaching…) → « Nouveaux mandats ». Tout s'additionne dans Semaine, Mois et Q4.</small>
+        <small style="color:var(--muted)">Tout est facultatif. Devis envoyé → « Devis ». Facture envoyée → « Facturé ». Paiement reçu → « Encaissé ». Contrat signé (DI-EYES, Personal Genius, coaching…) → « Nouveaux mandats ». Tout s'additionne dans Semaine, Mois et Q4.</small>
         <label class="f">Note (facultatif)</label>
         <textarea class="f" id="genNote" rows="2" placeholder="Ce que j'ai fait"></textarea>
       </div>
@@ -353,7 +353,7 @@
     <div class="card">
       <h2 class="sec">Tableau du trimestre</h2>
       <div style="overflow-x:auto"><table class="qtab" id="q4Table"></table></div>
-      <small style="color:var(--muted);display:block;margin-top:8px">Facturé, encaissé et dépenses = total de tes sessions, rien à saisir. Le ratio mensuel peut dépasser 100 % quand une facture d'un mois est payée le suivant : lis surtout le total du trimestre. Taux horaire réel = encaissé ÷ heures à destination du Business. Palier = encaissé du mois sur ton échelle (200 · 500 · 1000 · 2100 · 3500).</small>
+      <small style="color:var(--muted);display:block;margin-top:8px">Devis, facturé, encaissé et dépenses = total de tes sessions, rien à saisir. Le ratio mensuel peut dépasser 100 % quand une facture d'un mois est payée le suivant : lis surtout le total du trimestre. Taux horaire réel = encaissé ÷ heures à destination du Business. Palier = encaissé du mois sur ton échelle (200 · 500 · 1000 · 2100 · 3500).</small>
     </div>
     <div class="card">
       <h2 class="sec">Nouvelles sources de revenus (2 à identifier d'ici le 30 nov.)</h2>
@@ -842,6 +842,8 @@ function renderQ4(){
   const tot=a=>{const xs=a.filter(x=>x!==null);return xs.length?xs.reduce((x,y)=>x+y,0):null;};
   const fac=Q4_MOIS.map(([m])=>facMois(m));
   const rt=(e,f)=>f>0?Math.round((e||0)/f*100)+' %':'—';
+  const dev=Q4_MOIS.map(([m])=>{const l=S.sessions.filter(s=>s.date.slice(0,7)===m);return l.length?l.reduce((a,s)=>a+(s.devis||0),0):null;});
+  rows+='<tr><td>Devis envoyés <small style="color:var(--muted)">sessions</small></td>'+dev.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(dev))+'</td></tr>';
   rows+='<tr><td>Facturé <small style="color:var(--muted)">sessions</small></td>'+fac.map(v=>'<td>'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(fac))+'</td></tr>';
   rows+='<tr><td><b>Encaissé</b> <small style="color:var(--muted)">sessions</small></td>'+enc.map(v=>'<td style="font-weight:800">'+n(v)+'</td>').join('')+'<td class="tot">'+n(tot(enc))+'</td></tr>';
   rows+='<tr><td>Encaissé / facturé</td>'+Q4_MOIS.map((x,i)=>'<td>'+rt(enc[i],fac[i])+'</td>').join('')+'<td class="tot">'+rt(tot(enc),tot(fac))+'</td></tr>';
@@ -973,6 +975,7 @@ function saveClose(){
     cash:parseFloat(document.getElementById('genRevenu').value)||0,
     facture:parseFloat(document.getElementById('genFacture').value)||0,
     mandats:parseInt(document.getElementById('genMandats').value)||0,
+    devis:parseFloat(document.getElementById('genDevis').value)||0,
     nouvSource:document.getElementById('genNouvSource').checked,
     retard:document.getElementById('genRetard').checked
   };
@@ -1027,6 +1030,7 @@ function editSession(i){
   document.getElementById('genRevenu').value=s.cash||'';
   document.getElementById('genFacture').value=s.facture||'';
   document.getElementById('genMandats').value=s.mandats||'';
+  document.getElementById('genDevis').value=s.devis||'';
   document.getElementById('genNouvSource').checked=!!s.nouvSource;
   document.getElementById('genRetard').checked=!!s.retard;
   document.getElementById('genIsClient').checked=!!s.isClient;
@@ -1077,11 +1081,11 @@ function exportProspects(){
 
 /* ── Agrégation ── */
 function agg(list){
-  const t={cash:0,facture:0,dep:0,investi:0,revenus:0,h:0,n:list.length,retards:0,
+  const t={cash:0,facture:0,devis:0,dep:0,investi:0,revenus:0,h:0,n:list.length,retards:0,
     byBlock:{pratique:0,eclaire:0,gere:0,produis:0,connecte:0},
     byPillar:{terre:0,vide:0,eau:0,feu:0,vent:0}};
   list.forEach(s=>{
-    t.cash+=s.cash||0;t.facture+=s.facture||0;t.dep+=(s.depense||0)+(s.investi||0);t.investi+=s.investi||0;t.revenus+=s.revenus||0;
+    t.cash+=s.cash||0;t.facture+=s.facture||0;t.devis+=s.devis||0;t.dep+=(s.depense||0)+(s.investi||0);t.investi+=s.investi||0;t.revenus+=s.revenus||0;
     t.h+=s.duree||0;if(s.retard)t.retards++;
     if(t.byBlock.hasOwnProperty(s.type))t.byBlock[s.type]+=s.duree||0;
     if(s.pilier&&t.byPillar.hasOwnProperty(s.pilier))t.byPillar[s.pilier]+=s.duree||0;
@@ -1159,6 +1163,7 @@ function renderAll(){
   document.getElementById('weekKpis').innerHTML=
     kpi(fmtDuree(w.h),'Temps total tracké','dark')+
     kpi(w.n,'Sessions','dark')+
+    kpi(Math.round(w.devis)+' CHF','Devis envoyés','dark')+
     kpi(Math.round(w.facture)+' CHF','Facturé','dark')+
     kpi(Math.round(w.cash)+' CHF','Encaissé','dark')+
     kpi(ratioEF(w.cash,w.facture),'Encaissé / facturé','dark')+
@@ -1172,6 +1177,7 @@ function renderAll(){
   document.getElementById('monthKpis').innerHTML=
     kpi(fmtDuree(mo.h),'Temps total tracké','dark')+
     kpi(mo.n,'Sessions','dark')+
+    kpi(Math.round(mo.devis)+' CHF','Devis envoyés','dark')+
     kpi(Math.round(mo.facture)+' CHF','Facturé','dark')+
     kpi(Math.round(mo.cash)+' CHF','Encaissé','dark')+
     kpi(ratioEF(mo.cash,mo.facture),'Encaissé / facturé','dark')+
@@ -1640,12 +1646,21 @@ async function importFromHash(){
   let data;try{const b=m[1].replace(/-/g,'+').replace(/_/g,'/');data=JSON.parse(decodeURIComponent(escape(atob(b))));}catch(e){toast('Lien d\u2019import illisible');return;}
   const list=(data&&data.sessions)||[];const ids=new Set(S.sessions.map(s=>s.id).filter(Boolean));
   const nouv=list.filter(s=>s&&s.id&&!ids.has(s.id)&&s.date&&s.type);
-  if(!nouv.length){toast('Déjà importé : rien de nouveau');return;}
-  if(!confirm('Ajouter '+nouv.length+' session(s) préparée(s) par Claude ?\n\n'+nouv.map(s=>s.date.slice(0,10)+' · '+(TYPES[s.type]||s.type)+(s.facture?' · facturé '+s.facture:'')+(s.cash?' · encaissé '+s.cash:'')).join('\n')))return;
+  const cl=((data&&data.clients)||[]).filter(c=>c&&c.nom&&!S.clients.some(x=>x.nom.toLowerCase()===c.nom.toLowerCase()));
+  const maj=((data&&data.maj)||[]).map(u=>({u,s:S.sessions.find(x=>x.id===u.id)})).filter(x=>x.s&&Object.keys(x.u.set||{}).some(k=>x.s[k]!==x.u.set[k]));
+  if(!nouv.length&&!cl.length&&!maj.length){toast('Déjà importé : rien de nouveau');return;}
+  const lignes=[].concat(
+    nouv.map(s=>'+ '+s.date.slice(0,10)+' · '+(TYPES[s.type]||s.type)+(s.facture?' · facturé '+s.facture:'')+(s.cash?' · encaissé '+s.cash:'')),
+    cl.map(c=>'+ Forfait '+c.nom+' : '+c.hRest+' h restantes sur '+c.hTot+' h'),
+    maj.map(x=>'✎ '+(x.s.titre||x.s.categorie||x.s.type)+' → '+Object.entries(x.u.set).map(([k,v])=>k+' '+v).join(', ')));
+  if(!confirm('Appliquer les changements préparés par Claude ?\n\n'+lignes.join('\n')))return;
   nouv.forEach(s=>S.sessions.push(s));S.sessions.sort((x,y)=>y.date.localeCompare(x.date));
-  await save(nouv.length+' session(s) importée(s) ✓');renderAll();
+  cl.forEach(c=>S.clients.push({id:c.id||Date.now()+Math.random(),nom:c.nom,hTot:c.hTot,hRest:c.hRest,prix:c.prix||0}));
+  maj.forEach(x=>Object.assign(x.s,x.u.set));
+  await save(lignes.length+' changement(s) appliqué(s) ✓');renderAll();
 }
 load().then(importFromHash);
+window.addEventListener('hashchange',importFromHash);
 loadAuto();
 </script>
 </body>
